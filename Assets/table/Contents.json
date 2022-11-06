@@ -1,0 +1,32 @@
+{
+  "images" : [
+    {
+      "size" : "640x640",
+      "idiom" : "mac",
+      "filename" : "full_bg.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "282x282",
+      "idiom" : "mac",
+      "filename" : "stone_frame.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "364x364",
+      "idiom" : "mac",
+      "filename" : "feedback_frame.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "640x640",
+      "idiom" : "mac",
+      "filename" : "empty_texture.png",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
