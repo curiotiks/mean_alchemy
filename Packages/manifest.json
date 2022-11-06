@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "com.spoiledcat.git": "1.0.12",
-    "com.spoiledcat.git.ui": "1.0.12",
     "com.unity.2d.animation": "8.0.2",
     "com.unity.2d.pixel-perfect": "5.0.1",
     "com.unity.2d.psdimporter": "7.0.1",
