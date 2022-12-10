@@ -1,2 +1,2 @@
 # mean_alchemy
-A game for learning statistics
+A game for learning statistics!
