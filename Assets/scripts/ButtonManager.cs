@@ -6,15 +6,19 @@ using UnityEngine.UI;
 
 public class ButtonManager : MonoBehaviour
 {
-    public List<Button> buttons;
-    public Button x0, x1, x2, x3, x4, x5, x6, x7, x8, x9;
+    public List<Button> numButtons;
     public statsTable stats_table;
 
     void Start()
     {  
-        x0.onClick.AddListener( ()=>{
-            Debug.Log("hahaha");
-        });
+        for (int index=0; index < numButtons.Count; index++)
+        {   
+            int buttonValue = int.Parse(numButtons[index].name); // Uses object's name to assign value
+
+            numButtons[index].onClick.AddListener( ()=>{
+                stats_table.addValue(buttonValue);
+            });
+        }
     }
 
     // Update is called once per frame
