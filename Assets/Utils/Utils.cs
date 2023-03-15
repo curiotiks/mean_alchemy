@@ -217,10 +217,12 @@ public static class Utils
     }
 
     public static Tweener showTargetCanvasGroup(CanvasGroup targetUI, bool isShow, float time = 0.3f, UnityAction action = null){ 
+        if(targetUI == null)
+            return null;
+
         if(isShow)
             targetUI.gameObject.SetActive(true);    //시작에는 무조건 on
 
-        if(targetUI != null){ 
             targetUI.interactable = true;
             targetUI.blocksRaycasts = false;
             if(isShow){
@@ -239,8 +241,6 @@ public static class Utils
                         action();
                 });
             }
-        }else
-            return null;
     } 
 
     public static T convertStringToEnum<T>(string str){

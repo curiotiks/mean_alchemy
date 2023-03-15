@@ -11,7 +11,7 @@ public class PressedBtn : MonoBehaviour , IPointerDownHandler
 {
 
     Button btn; 
-    Transform myIcon;
+    Transform myIcon; 
     public CanvasGroup targetCG_tobeDisappear;
     public bool isTargetCGDisabled;
     public bool isMaskingEffectDisabledAfterFinished; 
@@ -21,13 +21,6 @@ public class PressedBtn : MonoBehaviour , IPointerDownHandler
     {
         btn = GetComponent<Button>(); 
         basicButtonAction = addBasicButtonAction;
-        
-        // Debug.Log(gameManager);
-
-        // if(transform.childCount>0)
-        //     myIcon = transform.GetChild(0);
-        
-        // if(transform.childCount == 0)
         myIcon = transform;
     }
 
@@ -41,15 +34,14 @@ public class PressedBtn : MonoBehaviour , IPointerDownHandler
     }
  
 
-    public void OnClick () {
-
+    public void OnClick () { 
         if(myIcon!=null)
         {
             basicButtonAction.Invoke();
 
-            if(isMaskingEffectDisabledAfterFinished)
+            // if(isMaskingEffectDisabledAfterFinished)
                 // GameManager.getInstance().uI_Controller.mainPanelManager.setMaskedEffectForTR(null, false);
-
+ 
             if(isTargetCGDisabled)
                 Utils.showTargetCanvasGroup(targetCG_tobeDisappear, false, 0.3f, ()=>{
                     targetCG_tobeDisappear.gameObject.SetActive(false);
@@ -59,14 +51,8 @@ public class PressedBtn : MonoBehaviour , IPointerDownHandler
         }
 	}
 
-    public void OnPressed () {
-        if (myIcon != null)
-            myIcon.localScale = Vector3.one * 1.1f;
-    }
-
     public void OnPointerDown(PointerEventData eventData)
     {
-        // OnPressed();
         OnClick();
     } 
 }
