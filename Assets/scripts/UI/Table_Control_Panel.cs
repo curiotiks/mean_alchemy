@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq; 
 using System;
+using UnityEngine.UI;
+using TMPro;
 
 public class Table_Control_Panel : MonoBehaviour
 {
+    public TextMeshProUGUI mean_text; 
+    public TextMeshProUGUI sd_text;
     public Table_Plot_Panel plot_panel;
     public static int max_height_count = 10; //how many in a column
     [HideInInspector]
@@ -41,6 +45,8 @@ public class Table_Control_Panel : MonoBehaviour
 
         Debug.Log("new mean: "+mean);
         Debug.Log("new sd: "+sd);
+        mean_text.text = "Mean: "+ Math.Round(mean, 2);
+        sd_text.text = "SD: "+ Math.Round(sd, 2);
         plot_panel.drawPlot(num, isAdded);
     }
 

@@ -25,11 +25,14 @@ public class Table_Plot_Panel : MonoBehaviour
     //num ranging from 1 to 10
     public void drawPlot(int num, bool isAdded){
         RectTransform rt = plot_item_list[num-1].GetComponent<RectTransform>();
+        Table_Plot_Item item = plot_item_list[num-1];
         float originalSize = rt.sizeDelta.y;
         if(isAdded){
             rt.sizeDelta = new Vector2(rt.sizeDelta.x, rt.sizeDelta.y + an_increment_height);
+            item.incrementStackedCount();
         }else{ 
             rt.sizeDelta = new Vector2(rt.sizeDelta.x, rt.sizeDelta.y - an_increment_height);
+            item.decrementStackedCount();
         }
     }
 
