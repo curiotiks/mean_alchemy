@@ -38,7 +38,7 @@ namespace TrollBridge {
 			}
 		}
 
-		void SetActivityOnExit(GameObject coll){
+		void SetActivityOnExit(GameObject coll){  
 			// Loop through the activated gameobjects.
 			for(int i = 0; i < activateGameObjects.Length; i++){
 				// IF we have matching Gameobjects for activation.
