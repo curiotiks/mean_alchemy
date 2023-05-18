@@ -25,6 +25,10 @@ public class Table_Control_Panel : MonoBehaviour
         numbers_list = new List<int>();
         instance = this;
     }
+
+    void Update() {
+        UpdateMeter();
+    }
     
     public void updateInput(int num, bool isAdded = true){
         if (isAdded){
@@ -88,7 +92,7 @@ public class Table_Control_Panel : MonoBehaviour
     {
         float rotationAngle = skew * rotationRange;
         Quaternion targetRotation = Quaternion.Euler(0f, rotationAngle, 0f);
-        meterArrow.transform.rotation = targetRotation;
+        meterArrow.transform.Rotate(0f, 0f, rotationAngle);
     }
 
     public void resetNumbers(){
