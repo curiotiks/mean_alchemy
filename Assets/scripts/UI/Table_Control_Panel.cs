@@ -11,16 +11,23 @@ public class Table_Control_Panel : MonoBehaviour
     public static Table_Control_Panel instance;
     public TextMeshProUGUI mean_text; 
     public TextMeshProUGUI sd_text;
-    public Table_Plot_Panel plot_panel; 
+    public Table_Plot_Panel plot_panel;
+    public GameObject meterArrow;
+    public float rotationRange = 180f; // The maximum rotation angle for the object (in degrees) 
     [HideInInspector]
     public List<int> numbers_list {get; set;}
-    public double mean;
-    public double sd;
+    public float mean;
+    public float sd;
+    public float skew;
     
 
     void Awake() {
         numbers_list = new List<int>();
         instance = this;
+    }
+
+    void Update() {
+        UpdateMeter();
     }
     
     public void updateInput(int num, bool isAdded = true){
@@ -44,8 +51,10 @@ public class Table_Control_Panel : MonoBehaviour
         Debug.Log( string.Join('_', numbers_list.ToArray()) );
 
         try{ 
-            mean = numbers_list.Average(); 
-            sd = standardDeviation(numbers_list);
+            mean = (float)numbers_list.Average(); 
+            sd = (float)standardDeviation(numbers_list);
+            skew = (float)CalculateSkewnessCoefficient();
+            UpdateMeter();
         }catch(InvalidOperationException e){
             mean = 0;
             sd = 0;
@@ -64,10 +73,33 @@ public class Table_Control_Panel : MonoBehaviour
         return Math.Sqrt(values.Average(v=>Math.Pow( (double)(v)-avg,2)));
     }
 
+    // Adding method to calculate skewness coefficient
+    private double CalculateSkewnessCoefficient()
+    {
+        float sumCubedDeviations = 0f;
+        foreach (float number in numbers_list)
+        {
+            float deviation = number - mean;
+            sumCubedDeviations += deviation * deviation * deviation;
+        }
+        float n = numbers_list.Count;
+        float numerator = (n / ((n - 1) * (n - 2))) * sumCubedDeviations;
+        float denominator = (float)System.Math.Pow(sd, 3);
+        return numerator / denominator;
+    }
+
+    private void UpdateMeter()
+    {
+        float rotationAngle = skew * rotationRange;
+        Quaternion targetRotation = Quaternion.Euler(0f, rotationAngle, 0f);
+        meterArrow.transform.Rotate(0f, 0f, rotationAngle);
+    }
+
     public void resetNumbers(){
         numbers_list.Clear();
         mean = 0;
         sd = 0;
+        skew = 0;
         plot_panel.resetPlot();
     }
 }
