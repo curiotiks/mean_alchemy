@@ -29,8 +29,18 @@ public class Dialogue_Manager : MonoBehaviour
         dialogBehaviour.StartDialog(dialogGraph);
     }
 
+    public void startDialog(DialogNodeGraph dialogGraph)
+    {
+        if (dialogGraph == null)
+        {
+            Debug.LogError("Dialog graph is null");
+            return;
+        }
+        dialogBehaviour.StartDialog(dialogGraph);
+    }
+
     void Start()
     {
-        Dialogue_Manager._instance.startDialog("Dialogue_test1");
+        // Dialogue_Manager._instance.startDialog("Dialogue_test1");
     }
 }

@@ -28,6 +28,7 @@ namespace cherrydev
         public void ResetDialogText()
         {
             dialogText.text = string.Empty;
+            dialogCharacterImage.sprite = null;
         }
 
         /// <summary>

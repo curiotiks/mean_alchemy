@@ -12,6 +12,7 @@ namespace cherrydev
 
         [SerializeField] private UnityEvent onDialogStart;
         [SerializeField] private UnityEvent onDialogFinished;
+        public GameObject dialogCanvas;
 
         private DialogNodeGraph currentNodeGraph;
         private Node currentNode;
@@ -32,12 +33,24 @@ namespace cherrydev
 
         public static event Action<char> OnDialogTextCharWrote;
 
+        public void resetDialog()
+        {
+            currentNodeGraph = null;
+            currentNode = null;
+            DialogDisplayer dd = gameObject.GetComponent<DialogDisplayer>();
+            dd.dialogSentensePanel.ResetDialogText();
+            dialogCanvas.SetActive(false);
+        }
+
         /// <summary>
         /// Start a dialog
         /// </summary>
         /// <param name="dialogNodeGraph"></param>
         public void StartDialog(DialogNodeGraph dialogNodeGraph)
         {
+            resetDialog();
+            dialogCanvas.SetActive(true);
+
             if (dialogNodeGraph.nodesList == null)
             {
                 Debug.LogWarning("Dialog Graph's node list is empty");

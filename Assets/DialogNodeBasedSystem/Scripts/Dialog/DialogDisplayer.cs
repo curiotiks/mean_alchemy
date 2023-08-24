@@ -4,7 +4,7 @@ namespace cherrydev
 {
     public class DialogDisplayer : MonoBehaviour
     {
-        [SerializeField] private SentencePanel dialogSentensePanel;
+        [SerializeField] public SentencePanel dialogSentensePanel;
         [SerializeField] private AnswerPanel dialogAnswerPanel;
         [SerializeField] private DialogBehaviour dialogBehaviour;
 
