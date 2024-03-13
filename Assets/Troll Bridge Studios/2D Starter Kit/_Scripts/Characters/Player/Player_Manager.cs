@@ -46,7 +46,7 @@ namespace TrollBridge
             // Get the Character Stats script.
             charStats = GetComponentInChildren<Character_Stats>();
             // Load the Inventory.
-            Grid.inventory.LoadInventory();
+            // Grid.inventory.LoadInventory();
         }
 
         void Start()

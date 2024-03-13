@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 133236, guid: 52532b9639cf09f4ca36929ce5fb4bcd, type: 3}
       propertyPath: m_Name
-      value: Player Manager
+      value: Player Manager Variant
       objectReference: {fileID: 0}
     - target: {fileID: 4000010157279726, guid: 52532b9639cf09f4ca36929ce5fb4bcd, type: 3}
       propertyPath: m_RootOrder
@@ -113,6 +113,7 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -2019851445, guid: c46fc39bd80974c26bd64305ef3cb156,
         type: 3}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 11478246, guid: 52532b9639cf09f4ca36929ce5fb4bcd, type: 3}
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 52532b9639cf09f4ca36929ce5fb4bcd, type: 3}
