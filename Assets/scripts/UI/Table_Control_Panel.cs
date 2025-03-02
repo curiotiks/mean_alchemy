@@ -9,11 +9,14 @@ using TMPro;
 public class Table_Control_Panel : MonoBehaviour
 {
     public static Table_Control_Panel instance;
-    public TextMeshProUGUI mean_text; 
+    public TextMeshProUGUI mean_text;
+    public TextMeshProUGUI skew_text;
     public TextMeshProUGUI sd_text;
     public Table_Plot_Panel plot_panel;
     public GameObject meterArrow;
-    public float rotationRange = 180f; // The maximum rotation angle for the object (in degrees) 
+    public float rotationRange = 180f,rotationFactor = -30f; // The maximum rotation angle for the object (in degrees) 
+    [SerializeField]
+    float rotationAngle = 0f;
     [HideInInspector]
     public List<int> numbers_list {get; set;}
     public float mean;
@@ -40,7 +43,7 @@ public class Table_Control_Panel : MonoBehaviour
 
 
             Debug.Log("new input: "+num);
-            numbers_list.Add( num );
+                .Add( num );
         }else{
             //cases when numbers are excluded by clicking bar items on table_plot_panel
             if(numbers_list.Contains(num)){
@@ -88,11 +91,19 @@ public class Table_Control_Panel : MonoBehaviour
         return numerator / denominator;
     }
 
+    //private void UpdateMeter()
+    //{
+    //    float rotationAngle = skew * rotationRange;
+    //    Quaternion targetRotation = Quaternion.Euler(0f, rotationAngle, 0f);
+    //    meterArrow.transform.Rotate(0f, 0f, rotationAngle);
+    //}
     private void UpdateMeter()
     {
-        float rotationAngle = skew * rotationRange;
-        Quaternion targetRotation = Quaternion.Euler(0f, rotationAngle, 0f);
-        meterArrow.transform.Rotate(0f, 0f, rotationAngle);
+        skew = Mathf.Clamp((Mathf.Round(skew *100f)*.01f), -3f, 3f);
+        rotationAngle = skew* rotationFactor;
+        skew_text.SetText(skew.ToString());
+        Quaternion targetRotation = Quaternion.Euler(0, 0,rotationAngle);
+        meterArrow.transform.rotation = targetRotation;
     }
 
     public void resetNumbers(){
@@ -101,5 +112,6 @@ public class Table_Control_Panel : MonoBehaviour
         sd = 0;
         skew = 0;
         plot_panel.resetPlot();
+      //  UpdateMeter();
     }
 }
