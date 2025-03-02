@@ -43,7 +43,7 @@ public class Table_Control_Panel : MonoBehaviour
 
 
             Debug.Log("new input: "+num);
-                .Add( num );
+                numbers_list.Add( num );
         }else{
             //cases when numbers are excluded by clicking bar items on table_plot_panel
             if(numbers_list.Contains(num)){
