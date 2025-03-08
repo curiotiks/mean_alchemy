@@ -6,11 +6,12 @@ using DG.Tweening;
 
 public class Btn_num : MonoBehaviour
 {
+    public int elementButtonCount = 0;
     public Table_Control_Panel table_control_panel;
     public Table_Plot_Panel table_plot_panel;
     public TextMeshProUGUI text_ui,item_count_text;
-    [HideInInspector]
-    private Button btn;
+    //[HideInInspector]
+    [SerializeField ]private Button btn;
     void Awake()
     {
         #region set buttons text refering to the gameobject name
@@ -26,7 +27,7 @@ public class Btn_num : MonoBehaviour
         text_ui = GetComponentInChildren<TextMeshProUGUI>(true) as TextMeshProUGUI;
         text_ui.enableAutoSizing = true;
         text_ui.text = num+"";
-
+        item_count_text.enabled = true;
         #endregion
 
         btn = GetComponent<Button>();
@@ -46,13 +47,16 @@ public class Btn_num : MonoBehaviour
 
         //re-check
         if (num < 1)    return;
-        table_control_panel.updateInput(num);
-        UpdateItemText(num);
+        //table_control_panel.updateInput(num);
+        UpdateItemText(table_control_panel.updateInput(num));
     }
 
-    void UpdateItemText(int num)
+    public void UpdateItemText(int num)
     {
-        item_count_text.enabled = (num <= 0 ? false : true);
-        item_count_text.SetText($"{num} / {table_plot_panel?.max_stacked_count}");
+        elementButtonCount = num;
+        if (!item_count_text)
+            return;
+        //item_count_text.enabled = (num <= 0 ? false : true);
+        item_count_text.SetText(num <= 0 ? "Empty" : $"{num} / {table_plot_panel?.max_stacked_count}");
     }
 }

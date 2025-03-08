@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Callbacks;
+#endif
 using UnityEngine;
 
 namespace cherrydev
 {
+    #if UNITY_EDITOR
     public class NodeEditor : EditorWindow
     {
         private static DialogNodeGraph currentNodeGraph;
@@ -669,4 +673,5 @@ namespace cherrydev
             }
         }
     }
+#endif
 }

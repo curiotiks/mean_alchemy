@@ -3,12 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class Table_Plot_Panel : MonoBehaviour
 { 
     private List<VerticalLayoutGroup> vertical_layout_group_list = new List<VerticalLayoutGroup>();
     public int max_stacked_count = 10;
     public TextMeshProUGUI y_axis;
+
+    [Header("Quit Level Panels")]
+    [SerializeField] GameObject quitLevelPanel;
+    [SerializeField] Button QuitLevelButton;
+    [SerializeField] Button YesButton;
+    [SerializeField] Button NoButton;
+
 
     void Start() { 
         //find all vertical layout group
@@ -21,6 +29,21 @@ public class Table_Plot_Panel : MonoBehaviour
         if(vertical_layout_group_list.Count != 10){
             Debug.Log("vertical layout group count is not 10");
         }
+
+        QuitLevelButton.onClick.RemoveAllListeners();
+        QuitLevelButton.onClick.AddListener(() => toggleQuitLevelPanel(true));
+
+        NoButton.onClick.RemoveAllListeners();
+        NoButton.onClick.AddListener(() => toggleQuitLevelPanel(false));
+
+        YesButton.onClick.RemoveAllListeners();
+        YesButton.onClick.AddListener(
+            () =>
+            {
+                // CAHGNE THIS TO SCENE HANDLING SCRIPT, REMOVE THIS FIX
+                SceneManager.LoadScene("world_map_A1");
+            }
+            );
 
         instantiateVerticalLayoutGroups();
     } 
@@ -45,13 +68,15 @@ public class Table_Plot_Panel : MonoBehaviour
                 new_obj.AddComponent<Button>();
                 Button btn = new_obj.GetComponent<Button>();
                 btn.interactable = false;
-                btn.onClick.AddListener( () => { 
-                    Table_Control_Panel.instance.updateInput(int.Parse(new_obj.name.Split('_')[1]), false);
+                btn.onClick.AddListener(() => {
+                Table_Control_Panel.instance.updateInput(int.Parse(new_obj.name.Split('_')[1]), false);
+               
                 });
             }
             num_for_name++;
         }
-    } 
+    }
+
 
     public void drawPlot(int num, bool isAdded){
         // Debug.Log("drawPlot: "+num+" "+isAdded);
@@ -86,5 +111,10 @@ public class Table_Plot_Panel : MonoBehaviour
         //     RectTransform rt = x.GetComponent<RectTransform>();
         //     rt.sizeDelta = new Vector2(rt.sizeDelta.x, 0);
         // }
+    }
+
+    public void toggleQuitLevelPanel(bool state = false)
+    {
+        quitLevelPanel.SetActive(state);
     }
 }
