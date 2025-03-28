@@ -17,6 +17,15 @@ public class Table_Plot_Panel : MonoBehaviour
     [SerializeField] Button YesButton;
     [SerializeField] Button NoButton;
 
+    [Header("TRANSMUTE")]
+    [SerializeField] GameObject TransmutePanel;
+    [SerializeField] GameObject DataElementsHolder;
+    [SerializeField] List<GameObject> DataElements;
+    [SerializeField] GameObject DataElementPrefab;
+    [SerializeField] Button TransmuteButton;
+    [SerializeField] Button ConfirmTransmuteButton;
+    [SerializeField] Button CancelTransmuteButton;
+
 
     void Start() { 
         //find all vertical layout group
@@ -29,6 +38,8 @@ public class Table_Plot_Panel : MonoBehaviour
         if(vertical_layout_group_list.Count != 10){
             Debug.Log("vertical layout group count is not 10");
         }
+
+        DataElements.Clear();
 
         QuitLevelButton.onClick.RemoveAllListeners();
         QuitLevelButton.onClick.AddListener(() => toggleQuitLevelPanel(true));
@@ -44,6 +55,15 @@ public class Table_Plot_Panel : MonoBehaviour
                 SceneManager.LoadScene("world_map_A1");
             }
             );
+
+        TransmuteButton.onClick.RemoveAllListeners();
+        TransmuteButton.onClick.AddListener(setUpTransmutePanel);
+
+        ConfirmTransmuteButton.onClick.RemoveAllListeners();
+        ConfirmTransmuteButton.onClick.AddListener(confirmTransmute);
+
+        CancelTransmuteButton.onClick.RemoveAllListeners();
+        CancelTransmuteButton.onClick.AddListener(cancelTransmute);
 
         instantiateVerticalLayoutGroups();
     } 
@@ -116,5 +136,59 @@ public class Table_Plot_Panel : MonoBehaviour
     public void toggleQuitLevelPanel(bool state = false)
     {
         quitLevelPanel.SetActive(state);
+    }
+
+    private void setUpTransmutePanel()
+    {
+        if(!TransmutePanel)
+        { 
+            return; 
+        }
+
+        TransmuteManager._instance.TransmuteMakeNew();
+        //Update UI here
+        setUpDataElements("Name :",TransmuteManager.tempFamiliarItem.name);
+        setUpDataElements("ID :",TransmuteManager.tempFamiliarItem.id.ToString());
+        setUpDataElements("Description :", TransmuteManager.tempFamiliarItem.description,false);
+        setUpDataElements("Mean :", TransmuteManager.tempFamiliarItem.mean.ToString(),false);
+        setUpDataElements("SD :", TransmuteManager.tempFamiliarItem.sd.ToString(),false);
+        setUpDataElements("Skew :", TransmuteManager.tempFamiliarItem.skew.ToString(),false);
+        TransmutePanel.SetActive(true);
+
+    }
+
+    private void setUpDataElements(string key, string value, bool isInteractable = true)
+    {
+        GameObject tempDataElement;
+        tempDataElement = Instantiate(DataElementPrefab) as GameObject;
+
+        tempDataElement.GetComponentInChildren<TMP_Text>().text = key;
+        tempDataElement.GetComponentInChildren<TMP_InputField>().text = value;
+        tempDataElement.GetComponentInChildren<TMP_InputField>().interactable = isInteractable;
+
+        tempDataElement.transform.SetParent(DataElementsHolder.transform, false);
+        DataElements.Add(tempDataElement);
+    }
+
+    private void confirmTransmute()
+    {
+        TransmuteManager._instance.TransmuteAddNew();
+        TransmutePanel.SetActive(false);
+        foreach (Transform child in DataElementsHolder.transform)
+        {
+            DataElements.Remove(child.gameObject);
+            GameObject.Destroy(child.gameObject);
+        }
+    }
+
+    private void cancelTransmute()
+    {
+        TransmuteManager._instance.TransmuteEraseNew();
+        TransmutePanel.SetActive(false);
+        foreach (Transform child in DataElementsHolder.transform)
+        {
+            DataElements.Remove(child.gameObject);
+            GameObject.Destroy(child.gameObject);
+        }
     }
 }
