@@ -27,6 +27,7 @@ public class scene_changer : MonoBehaviour
 
             //only when current scene name is not world_map_A1
             if (SceneManager.GetActiveScene().name != "world_map_A1")
+                SceneManager.sceneLoaded += BountyBoardManager.instance.OnSceneLoaded;
                 SceneManager.sceneLoaded += OnSceneLoaded;
 
         }
@@ -55,6 +56,8 @@ public class scene_changer : MonoBehaviour
         }
 
         Debug.Log("Scene Loaded: " + scene.name);
+        SceneManager.sceneLoaded -= BountyBoardManager.instance.OnSceneLoaded;
         SceneManager.sceneLoaded -= OnSceneLoaded;
+
     }
 }
