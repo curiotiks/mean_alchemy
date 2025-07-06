@@ -15,21 +15,61 @@ public class CombatManager : MonoBehaviour
     public Slider userHPbar, enemyHPbar;
     public TextMeshProUGUI hpText_user, hpText_enemy;
     public TextMeshProUGUI combatLog;
-    private bool isExecuted = false;
+    [SerializeField] private bool isExecuted = false;
     public GameObject playerGO, enemyGO;
     public GameObject attackImage;
 
 
-    public CombatManager setBountyItem(BountyItem bountyItem)
+    public CombatManager SetBountyItem(BountyItem bountyItem)
     {
         this.bountyItem_info = bountyItem.deepCopy();
         return this;
     }
 
+    private void Awake()
+    {
+
+        //GameObject go = GameObject.Find("CombatManager_Temp");
+        //if (go != null)
+        //{
+        //    bountyItem_info = go.GetComponent<CombatManager>().bountyItem_info.deepCopy();
+        //    Destroy(go);
+        //}
+
+    }
+
+    void Start()
+    {
+        attackBtn.onClick.RemoveAllListeners();
+        attackBtn.onClick.AddListener(() => 
+        {
+            Attack();
+        });
+        attackBtn.interactable = true;
+
+        surrenderBtn.onClick.RemoveAllListeners();
+        surrenderBtn.onClick.AddListener(() => 
+        {
+            Surrender();
+        });
+        surrenderBtn.interactable = true;
+
+        StartCombat();
+    }
+
     public void StartCombat()
     {
         Debug.Log("Start Combat");
-        userInfo_temp_for_combat = GameManager.instance.userInfo.deepCopy();
+        //userInfo_temp_for_combat = GameManager.instance.userInfo.deepCopy();
+        userInfo_temp_for_combat = new UserInfo("Player1", "1102", 500, 3, 1000, 3, Random.Range(20, 31), Random.Range(-2f, 2f));
+        if (!BountyBoardManager.instance)
+        {
+            enabled = false;
+            this.gameObject.SetActive(false);
+            return;
+        }
+        bountyItem_info = BountyBoardManager.instance.currentBounty.bountyItem.deepCopy();
+
 
         Debug.Log(userInfo_temp_for_combat+"userHPbar: "+userHPbar);
         Debug.Log("User Info: " + userInfo_temp_for_combat.mean + " " + userInfo_temp_for_combat.sd);
@@ -43,23 +83,6 @@ public class CombatManager : MonoBehaviour
         hpText_enemy.text = "HP: " + bountyItem_info.mean.ToString();
     }
 
-    private void Awake() {
-
-        GameObject go = GameObject.Find("CombatManager_Temp");
-        if (go != null){
-            bountyItem_info = go.GetComponent<CombatManager>().bountyItem_info.deepCopy();
-            Destroy(go); 
-        }
-
-
-        attackBtn.onClick.AddListener(Attack);
-        surrenderBtn.onClick.AddListener(Surrender);
-    }
-
-    void Start()
-    {
-        StartCombat();
-    }
 
     public void Surrender()
     {
@@ -84,6 +107,7 @@ public class CombatManager : MonoBehaviour
     
     public void Attack()
     {
+        Debug.Log("Attack Button Clicked"); 
         if (isExecuted){
             return;
         }

@@ -209,7 +209,7 @@ public class BountyBoardManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("CardHolderParent not found in the scene.");
+            Debug.LogWarning("CardHolderParent not found in the scene.");
         }
 
         InitializeCards();

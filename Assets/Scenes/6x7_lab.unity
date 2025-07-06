@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a0d3adac5804ca189b8a34ca0af2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destScene: 3
+  destScene: Table
 --- !u!4 &51764
 Transform:
   m_ObjectHideFlags: 0
@@ -1136,7 +1136,7 @@ PrefabInstance:
     - target: {fileID: 7261674859169398694, guid: 475a1593ca6f54c059a26fd25bc8a929,
         type: 3}
       propertyPath: destScene
-      value: world_map_A1
+      value: Combat
       objectReference: {fileID: 0}
     - target: {fileID: 7261674859169398712, guid: 475a1593ca6f54c059a26fd25bc8a929,
         type: 3}

@@ -1,6 +1,5 @@
 
 using System;
-using UnityEngine;
 
 [Serializable]
 public class FamiliarItem
@@ -26,4 +25,8 @@ public class FamiliarItem
         this.skew = skew;
     }
 
+    public FamiliarItem deepCopy()
+    {
+        return this;
+    }
 }
