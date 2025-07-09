@@ -31,7 +31,7 @@ public class Btn_num : MonoBehaviour
         #endregion
 
         btn = GetComponent<Button>();
-        btn.onClick.AddListener( delegate{buttonHandler(num);} );
+        btn.onClick.AddListener( delegate{buttonHandler(num);} ); // This could be updated to: btn.onClick.AddListener(() => buttonHandler(num));
         UpdateItemText(0);
         
     }
