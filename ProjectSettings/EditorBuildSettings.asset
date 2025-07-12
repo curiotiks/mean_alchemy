@@ -6,14 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/Start_Town.unity
+    path: Assets/Scenes/Unused Scenes/Start_Town.unity
     guid: 4e8672f691f49dc43a93e1af300331fd
   - enabled: 0
-    path: Assets/Scenes/Unused Scenes/HouseMd.unity
-    guid: 0f272fa8ef836f445bb9051774265ee6
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/Unused Scenes/HouseLrg.unity
-    guid: 9863025ee9f45e646aa2989ee9e9d133
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
     path: Assets/Scenes/Combat.unity
     guid: d513b49acff702148aec445219270e35
@@ -21,19 +21,19 @@ EditorBuildSettings:
     path: Assets/Scenes/Unused Scenes/InnBasement.unity
     guid: da89c6db9cb62d541878d1fe25ab0bf5
   - enabled: 0
-    path: Assets/Scenes/Unused Scenes/MainWorld_Custom.unity
-    guid: 554e795e663fc4e5ea638d8f394d7cfd
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/Unused Scenes/HouseSml.unity
-    guid: 78567585f85dc4246b131bb846632a7d
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/Scenes/6x7_lab.unity
+    path: Assets/Scenes/TheLab.unity
     guid: 1f87fac429a3f49d092fe9a037330aa4
   - enabled: 1
-    path: Assets/Scenes/world_map_A1.unity
+    path: Assets/Scenes/WorldMap.unity
     guid: aeb956fbed1064087a5db1ea69395872
   - enabled: 1
-    path: Assets/Scenes/Table.unity
+    path: Assets/Scenes/AlchemyTable.unity
     guid: 9bbf8c636079f4468a34ac96e1f59a98
   - enabled: 1
     path: Assets/Scenes/BountyBoard.unity

@@ -52,7 +52,7 @@ public class Table_Plot_Panel : MonoBehaviour
             () =>
             {
                 // CAHGNE THIS TO SCENE HANDLING SCRIPT, REMOVE THIS FIX
-                SceneManager.LoadScene("world_map_A1");
+                SceneManager.LoadScene("WorldMap");
             }
             );
 

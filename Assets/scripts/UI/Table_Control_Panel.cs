@@ -64,7 +64,7 @@ public class Table_Control_Panel : MonoBehaviour
             sd = (float)standardDeviation(numbers_list);
             skew = (float)CalculateSkewnessCoefficient();
             UpdateMeter();
-        }catch(InvalidOperationException e){
+        }catch(InvalidOperationException){
             mean = 0;
             sd = 0;
         }
@@ -108,7 +108,7 @@ public class Table_Control_Panel : MonoBehaviour
             skew = (float)CalculateSkewnessCoefficient();
             UpdateMeter();
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException)
         {
             mean = 0;
             sd = 0;

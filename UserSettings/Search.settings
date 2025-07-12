@@ -7,6 +7,12 @@ onBoardingDoNotAskAgain = true
 showPackageIndexes = false
 showStatusBar = false
 scopes = {
+	"last_search.8BEC98E7" = "world_map_A1"
+	"OpenInspectorPreview.8BEC98E7" = "0"
+	"currentGroup.8BEC98E7" = "asset"
+	"last_search.AE24D059" = "world_map_A1"
+	"OpenInspectorPreview.AE24D059" = "0"
+	"currentGroup.AE24D059" = "all"
 }
 providers = {
 	find = {
@@ -53,6 +59,11 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	"wo"
+	"ta"
+	"Resources"
+	"g"
+	"t."
 ]
 searchItemFavorites = [
 ]
