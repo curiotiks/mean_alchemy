@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 [Serializable]
 public class UserInfo
@@ -14,12 +15,22 @@ public class UserInfo
     public int userReputation;
     public float mean;
     public float sd;
+    public SpawnLocation lastSpawnLocation = SpawnLocation.Default;
 
     public UserInfo(){
         
     }
 
-    public UserInfo(string userName, string userUid, int userGold, int userLevel, int userExp, int userReputation, float current_mean, float current_sd)
+    public UserInfo(string userName, 
+                    string userUid, 
+                    int userGold, 
+                    int userLevel, 
+                    int userExp, 
+                    int userReputation, 
+                    float current_mean, 
+                    float current_sd,
+                    SpawnLocation lastSpawnLocation
+                    )
     {
         this.userName = userName;
         this.userUid = userUid;
@@ -29,9 +40,10 @@ public class UserInfo
         this.userReputation = userReputation;
         this.mean = current_mean;
         this.sd = current_sd;
+        this.lastSpawnLocation = lastSpawnLocation;
     }
 
     public UserInfo deepCopy(){
-        return new UserInfo(userName, userUid, userGold, userLevel, userExp, userReputation, mean, sd);
+        return new UserInfo(userName, userUid, userGold, userLevel, userExp, userReputation, mean, sd, lastSpawnLocation);
     }
 } 

@@ -31,5 +31,8 @@ public class SceneChangerEditor : Editor
         EditorGUILayout.LabelField("Scene Changer", EditorStyles.boldLabel);
         int newIndex = EditorGUILayout.Popup("Destination Scene", currentIndex, sceneOptions);
         changer.destScene = sceneOptions[newIndex];
+
+        // Show spawn location dropdown
+        changer.spawnLocation = (SpawnLocation)EditorGUILayout.EnumPopup("Spawn Location", changer.spawnLocation);
     }
 }

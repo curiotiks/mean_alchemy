@@ -61,7 +61,15 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("Start Combat");
         //userInfo_temp_for_combat = GameManager.instance.userInfo.deepCopy();
-        userInfo_temp_for_combat = new UserInfo("Player1", "1102", 500, 3, 1000, 3, Random.Range(20, 31), Random.Range(-2f, 2f));
+        userInfo_temp_for_combat = new UserInfo("Player1", 
+                                                "1102", 
+                                                500, 
+                                                3, 
+                                                1000, 
+                                                3, 
+                                                Random.Range(20, 31), 
+                                                Random.Range(-2f, 2f),
+                                                SpawnLocation.Default); // Default Spawn Location   
         if (!BountyBoardManager.instance)
         {
             enabled = false;

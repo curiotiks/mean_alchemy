@@ -6,8 +6,15 @@ public class GameManager : MonoBehaviour {
  
     void Awake()
     {
-        instance = this;
-        DontDestroyOnLoad(this);
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(this);
+        }
+        else
+        {
+            Destroy(gameObject); // avoid duplicates
+        }
     }
 
     private void Start() {
@@ -21,6 +28,7 @@ public class GameManager : MonoBehaviour {
         userInfo.userReputation = 0;
         userInfo.mean = 10;
         userInfo.sd = 2;
+        userInfo.lastSpawnLocation = SpawnLocation.Default;
     }
 
     public UserInfo getUserInfo()

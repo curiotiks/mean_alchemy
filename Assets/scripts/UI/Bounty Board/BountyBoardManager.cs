@@ -83,21 +83,21 @@ public class BountyBoardManager : MonoBehaviour
                 int cardCOunt = 0;
                 foreach (BountyItem bounty in bountyItemsFromJSON)
                 {
-                    Debug.Log($"Trying to add '{bounty.difficulty}' to panel '{panel.name}' with difficulty '{panel.cardDifficulty}'");
+                    // Debug.Log($"Trying to add '{bounty.difficulty}' to panel '{panel.name}' with difficulty '{panel.cardDifficulty}'");
                     // For each panel, check if the bounty item difficulty matches the panel's difficulty
                     if (bounty.difficulty.Equals(panel.cardDifficulty.ToString(), StringComparison.OrdinalIgnoreCase) && (cardCOunt < panel.MaxCards))
                     {
-                        Debug.Log($"Adding '{bounty.difficulty}' to panel '{panel.name}'");
-                        Debug.Log($"Trying to add card '{bounty.name}' to panel '{panel.name}' (Child count before: {panel.transform.childCount})");
+                        // Debug.Log($"Adding '{bounty.difficulty}' to panel '{panel.name}'");
+                        // Debug.Log($"Trying to add card '{bounty.name}' to panel '{panel.name}' (Child count before: {panel.transform.childCount})");
                         GameObject tempCard = Instantiate(CardsPrefab, panel.transform);
-                        Debug.Log($"Card '{tempCard.name}' added. New child count: {panel.transform.childCount}");
+                        // Debug.Log($"Card '{tempCard.name}' added. New child count: {panel.transform.childCount}");
                         tempCard.GetComponent<BountyCard>().setCardInfo(bounty);
                         panel.AddCardsToThisRow(new List<GameObject> { tempCard });
                         cardCOunt++;
                     }
                     else
                     {
-                        Debug.Log($"Skipping '{bounty.difficulty}' for panel '{panel.name}' due to difficulty mismatch or max cards reached.");
+                        // Debug.Log($"Skipping '{bounty.difficulty}' for panel '{panel.name}' due to difficulty mismatch or max cards reached.");
                     }
                 }
                 cardCOunt = 0;
@@ -144,7 +144,7 @@ public class BountyBoardManager : MonoBehaviour
         string json = File.ReadAllText(BountyFilePath);
         // Handle JSON array deserialization
         json = $"{json}"; // Wrap array in an object
-        Debug.Log($"your Bounty Json : {json}");
+        // Debug.Log($"your Bounty Json : {json}");
         BountyItemWrapper wrapper = JsonUtility.FromJson<BountyItemWrapper>(json);
         return wrapper?.bountyItems ?? items;
     }
@@ -170,7 +170,7 @@ public class BountyBoardManager : MonoBehaviour
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.LogWarning("Scene Loaded: " + SceneManager.GetActiveScene().name);
+        // Debug.LogWarning("Scene : " + SceneManager.GetActiveScene().name);
         CardHolderParent = GameObject.FindGameObjectWithTag("cardholderparent");
         selectedCardPanel = GameObject.FindGameObjectWithTag("selectedcardholder");
         if (selectedCardPanel != null && currentBounty!=null && SceneManager.GetActiveScene().name!= "BountyBoard")

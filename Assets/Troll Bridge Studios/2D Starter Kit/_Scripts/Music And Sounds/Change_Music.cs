@@ -45,7 +45,7 @@ namespace TrollBridge
             if (NameMusic[SceneManager.GetActiveScene().buildIndex].BGMusic != null)
             {
                 Grid.init();
-                Debug.Log(Grid.soundManager);
+                // Debug.Log(Grid.soundManager);
                 // Play the BG Music.
                 Grid.soundManager.PlayBGMusic(NameMusic[SceneManager.GetActiveScene().buildIndex].BGMusic);
             }
