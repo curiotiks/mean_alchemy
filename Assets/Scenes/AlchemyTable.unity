@@ -928,6 +928,7 @@ GameObject:
   - component: {fileID: 114422471}
   - component: {fileID: 114422470}
   - component: {fileID: 114422469}
+  - component: {fileID: 114422472}
   m_Layer: 5
   m_Name: QuitLevel_btn
   m_TagString: Untagged
@@ -999,7 +1000,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 114422470}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 114422472}
+        m_TargetAssemblyTypeName: ObjectToggler, Assembly-CSharp
+        m_MethodName: Toggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &114422470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1038,6 +1051,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 114422467}
   m_CullTransparentMesh: 1
+--- !u!114 &114422472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 114422467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05795ba63cda7487c902d46f3d46d015, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1669255113}
+  toggle: 0
 --- !u!1 &119222597
 GameObject:
   m_ObjectHideFlags: 0
@@ -8081,8 +8108,6 @@ MonoBehaviour:
   y_axis: {fileID: 1413382510}
   quitLevelPanel: {fileID: 1669255113}
   QuitLevelButton: {fileID: 114422469}
-  YesButton: {fileID: 990542557}
-  NoButton: {fileID: 1713772329}
   TransmutePanel: {fileID: 95641278}
   DataElementsHolder: {fileID: 848644450}
   DataElements: []
@@ -9024,6 +9049,7 @@ GameObject:
   - component: {fileID: 990542559}
   - component: {fileID: 990542558}
   - component: {fileID: 990542557}
+  - component: {fileID: 990542560}
   m_Layer: 5
   m_Name: YesQuit_btn
   m_TagString: Untagged
@@ -9134,6 +9160,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 990542555}
   m_CullTransparentMesh: 1
+--- !u!114 &990542560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 990542555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a0d3adac5804ca189b8a34ca0af2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destScene: TheLab
 --- !u!1 &995682493
 GameObject:
   m_ObjectHideFlags: 0
@@ -15405,6 +15444,7 @@ GameObject:
   - component: {fileID: 1713772331}
   - component: {fileID: 1713772330}
   - component: {fileID: 1713772329}
+  - component: {fileID: 1713772332}
   m_Layer: 5
   m_Name: NoQuit_btn
   m_TagString: Untagged
@@ -15476,7 +15516,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1713772330}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1713772332}
+        m_TargetAssemblyTypeName: ObjectToggler, Assembly-CSharp
+        m_MethodName: Toggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1713772330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15515,6 +15567,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1713772327}
   m_CullTransparentMesh: 1
+--- !u!114 &1713772332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713772327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05795ba63cda7487c902d46f3d46d015, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1669255113}
+  toggle: 1
 --- !u!1 &1717836984
 GameObject:
   m_ObjectHideFlags: 0

@@ -46,7 +46,7 @@ public class BountyBoardManager : MonoBehaviour
     private void Start()
     {
         // Initialize the cards holder panels
-
+        SceneManager.sceneLoaded += OnSceneLoaded;
         CardHolderParent = GameObject.FindGameObjectWithTag("cardholderparent");
         cardsHolderPanels = CardHolderParent.GetComponentsInChildren<CardsHolderPanel>().ToList();
         foreach (CardsHolderPanel panel in cardsHolderPanels)

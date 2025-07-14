@@ -11,12 +11,6 @@ public class Table_Plot_Panel : MonoBehaviour
     public int max_stacked_count = 10;
     public TextMeshProUGUI y_axis;
 
-    [Header("Quit Level Panels")]
-    [SerializeField] GameObject quitLevelPanel;
-    [SerializeField] Button QuitLevelButton;
-    [SerializeField] Button YesButton;
-    [SerializeField] Button NoButton;
-
     [Header("TRANSMUTE")]
     [SerializeField] GameObject TransmutePanel;
     [SerializeField] GameObject DataElementsHolder;
@@ -40,21 +34,6 @@ public class Table_Plot_Panel : MonoBehaviour
         }
 
         DataElements.Clear();
-
-        QuitLevelButton.onClick.RemoveAllListeners();
-        QuitLevelButton.onClick.AddListener(() => toggleQuitLevelPanel(true));
-
-        NoButton.onClick.RemoveAllListeners();
-        NoButton.onClick.AddListener(() => toggleQuitLevelPanel(false));
-
-        YesButton.onClick.RemoveAllListeners();
-        YesButton.onClick.AddListener(
-            () =>
-            {
-                // CAHGNE THIS TO SCENE HANDLING SCRIPT, REMOVE THIS FIX
-                SceneManager.LoadScene("WorldMap");
-            }
-            );
 
         TransmuteButton.onClick.RemoveAllListeners();
         TransmuteButton.onClick.AddListener(setUpTransmutePanel);
@@ -131,11 +110,6 @@ public class Table_Plot_Panel : MonoBehaviour
         //     RectTransform rt = x.GetComponent<RectTransform>();
         //     rt.sizeDelta = new Vector2(rt.sizeDelta.x, 0);
         // }
-    }
-
-    public void toggleQuitLevelPanel(bool state = false)
-    {
-        quitLevelPanel.SetActive(state);
     }
 
     private void setUpTransmutePanel()

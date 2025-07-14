@@ -690,10 +690,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 566928999}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7829b5c3b5f6b794f8455b2e542656b0, type: 3}
+  m_Script: {fileID: 11500000, guid: d5a0d3adac5804ca189b8a34ca0af2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destScene: 6x7_lab
+  destScene: TheLab
 --- !u!1 &600043798
 GameObject:
   m_ObjectHideFlags: 0
