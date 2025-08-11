@@ -20,9 +20,12 @@ public class NPCMovement : MonoBehaviour
     public float detectionDistance = 3f;
     public LayerMask obstacleMask;
     public float alertDuration = 2f;
+    [Tooltip("Delay after resuming before NPC can notice the player again")] 
+    public float respotDelay = 0.75f; // seconds
 
     private bool playerSpotted = false;
-    private float alertTimer = 0f;
+    // private float alertTimer = 0f;
+    private float respotTimer = 0f; // counts down; when > 0, vision is temporarily disabled
 
     void Start()
     {
@@ -35,14 +38,41 @@ public class NPCMovement : MonoBehaviour
 
     void Update()
     {
+        // Handle spotted state before early returns so the alert timer ticks while stopped
+        /*
+        if (playerSpotted)
+        {
+            alertTimer -= Time.deltaTime;
+
+            if (alertTimer <= 0f)
+            {
+                Debug.Log("Resuming patrol.");
+                playerSpotted = false;
+                isMoving = true;
+
+                if (exclamationMark != null)
+                    exclamationMark.SetActive(false);
+
+                // Start short delay before NPC can notice the player again
+                respotTimer = Mathf.Max(0f, respotDelay);
+            }
+
+            return;
+        }
+        */
+
         if (!isMoving || isWaiting)
         {
             animator.SetBool("IsMoving", false);
             return;
         }
 
+        // Cooldown timer before NPC can notice the player again
+        if (respotTimer > 0f)
+            respotTimer -= Time.deltaTime;
+
         // Vision check for player using fan of raycasts
-        if (player != null)
+        if (player != null && !playerSpotted && respotTimer <= 0f)
         {
             Vector2 rayOrigin = (Vector2)transform.position + Vector2.up * 0.5f;
             Vector2 directionToPlayer = ((Vector2)player.position - rayOrigin).normalized;
@@ -70,23 +100,6 @@ public class NPCMovement : MonoBehaviour
                     break;
                 }
             }
-        }
-
-        if (playerSpotted)
-        {
-            alertTimer -= Time.deltaTime;
-
-            if (alertTimer <= 0f)
-            {
-                Debug.Log("Resuming patrol.");
-                playerSpotted = false;
-                isMoving = true;
-
-                if (exclamationMark != null)
-                    exclamationMark.SetActive(false);
-            }
-
-            return;
         }
 
         Vector2 target = waypoints[currentWaypointIndex].position;
@@ -124,9 +137,11 @@ public class NPCMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("Player collided with NPC: " + gameObject.name);
+            /*
             isMoving = false;
             rb.velocity = Vector2.zero;
             animator.SetBool("IsMoving", false);
+            */
 
             if (exclamationMark != null)
                 exclamationMark.SetActive(true);
@@ -137,7 +152,9 @@ public class NPCMovement : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            /*
             isMoving = true;
+            */
 
             if (exclamationMark != null)
                 exclamationMark.SetActive(false);
@@ -161,15 +178,17 @@ public class NPCMovement : MonoBehaviour
         {
             Debug.Log("Player spotted!");
             playerSpotted = true;
+            /*
             isMoving = false;
             rb.velocity = Vector2.zero;
             animator.SetBool("IsMoving", false);
+            */
             SetDirectionForAnimation(directionToPlayer);
 
             if (exclamationMark != null)
                 exclamationMark.SetActive(true);
 
-            alertTimer = alertDuration;
+            //alertTimer = alertDuration;
         }
     }
 }
