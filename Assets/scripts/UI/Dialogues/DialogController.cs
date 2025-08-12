@@ -11,7 +11,7 @@ namespace MeanAlchemy.Dialog
 
         void Awake()
         {
-            if (ui != null) ui.ShowPanel(false);
+            if (ui != null) ui.ShowPanel(false); //Start with panel hidden
         }
 
         // Show a single line with a Next button

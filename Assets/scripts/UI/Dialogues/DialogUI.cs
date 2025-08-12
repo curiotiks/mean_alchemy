@@ -18,6 +18,9 @@ namespace MeanAlchemy.Dialog
         [SerializeField] private Transform choicesGroup;     // parent of spawned buttons
         [SerializeField] private Button choiceButtonPrefab;  // your ChoiceButton prefab
 
+        // System.Action is a delegate type for a method with no parameters and no return value (void()).
+        // We store the current Next-button callback here; BindNext wires it to nextButton.onClick
+        // so clicking Next invokes this action. Example usage: BindNext(() => AdvanceToNextLine());
         private System.Action _onNext;
 
         public void ShowPanel(bool show) => panel.SetActive(show);
@@ -32,6 +35,10 @@ namespace MeanAlchemy.Dialog
 
         public void SetLine(string text) => lineText.text = text ?? string.Empty;
 
+
+        //BindNext tells the Next button what to do when it’s clicked—nothing more.
+        // It clears any old click actions and hooks up the new one you pass in.
+        // It does not show/hide the button (use ShowNext(true/false) for that).
         public void BindNext(System.Action onNext)
         {
             _onNext = onNext;

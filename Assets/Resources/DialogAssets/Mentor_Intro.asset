@@ -21,7 +21,7 @@ MonoBehaviour:
     text: You suck...
     choices:
     - label: Leave
-      gotoIndex: 0
+      gotoIndex: -1
     - label: Punch
-      gotoIndex: 0
-    nextIndex: 0
+      gotoIndex: -1
+    nextIndex: -1

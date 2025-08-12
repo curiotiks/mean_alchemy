@@ -27,6 +27,14 @@ public class NPCMovement : MonoBehaviour
     // private float alertTimer = 0f;
     private float respotTimer = 0f; // counts down; when > 0, vision is temporarily disabled
 
+    [SerializeField] private ConversationRunner conversationRunner;
+
+    void Awake()
+    {
+        if (conversationRunner == null)
+            conversationRunner = FindObjectOfType<ConversationRunner>(true);
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -142,6 +150,8 @@ public class NPCMovement : MonoBehaviour
             rb.velocity = Vector2.zero;
             animator.SetBool("IsMoving", false);
             */
+
+            conversationRunner?.Begin(); // Start conversation if ConversationRunner is assigned
 
             if (exclamationMark != null)
                 exclamationMark.SetActive(true);

@@ -3297,6 +3297,7 @@ MonoBehaviour:
     m_Bits: 256
   alertDuration: 2
   respotDelay: 0.75
+  conversationRunner: {fileID: 0}
 --- !u!61 &2041867321
 BoxCollider2D:
   m_ObjectHideFlags: 0
