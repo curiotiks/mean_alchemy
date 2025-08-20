@@ -1,0 +1,39 @@
+{
+  "entries": [
+    {
+      "key": "submit_button",
+      "action": "click",
+      "target": "EMPTY TARGET"
+    },
+    {
+      "key": "start_game",
+      "action": "click",
+      "target": "StartGameButton"
+    },
+    {
+      "key": "exit_game",
+      "action": "click",
+      "target": "ExitButton"
+    },
+    {
+      "key": "location_bounty_board",
+      "action": "enter",
+      "target": "toBountyBoard"
+    },
+    {
+      "key": "location_combat",
+      "action": "enter",
+      "target": "toCombat"
+    },
+    {
+      "key": "location_table",
+      "action": "enter",
+      "target": "toTable"
+    },
+    {
+      "key": "location_lab",
+      "action": "enter",
+      "target": "toLab"
+    }
+  ]
+}
