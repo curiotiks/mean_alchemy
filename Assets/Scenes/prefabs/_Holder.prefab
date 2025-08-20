@@ -5476,6 +5476,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d391fcbbc21db044a801384bf24bf264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerPosition: {x: 0, y: 0}
+  entry_trigger_name: 
 --- !u!1 &1645251837801287920
 GameObject:
   m_ObjectHideFlags: 0
