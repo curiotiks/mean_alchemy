@@ -119,14 +119,19 @@ public class Table_Plot_Panel : MonoBehaviour
             return; 
         }
 
-        TransmuteManager._instance.TransmuteMakeNew();
+        TransmuteManager.Instance.TransmuteMakeNew();
+        if (TransmuteManager.TempFamiliarItem == null)
+        {
+            Debug.LogWarning("TempFamiliarItem was not created by TransmuteMakeNew().");
+            return;
+        }
         //Update UI here
-        setUpDataElements("Name :",TransmuteManager.tempFamiliarItem.name);
-        setUpDataElements("ID :",TransmuteManager.tempFamiliarItem.id.ToString());
-        setUpDataElements("Description :", TransmuteManager.tempFamiliarItem.description,false);
-        setUpDataElements("Mean :", TransmuteManager.tempFamiliarItem.mean.ToString(),false);
-        setUpDataElements("SD :", TransmuteManager.tempFamiliarItem.sd.ToString(),false);
-        setUpDataElements("Skew :", TransmuteManager.tempFamiliarItem.skew.ToString(),false);
+        // setUpDataElements("Name :", TransmuteManager.TempFamiliarItem.name);
+        // setUpDataElements("ID :", TransmuteManager.TempFamiliarItem.id.ToString());
+        // setUpDataElements("Description :", TransmuteManager.TempFamiliarItem.description, false);
+        setUpDataElements("Mean :", TransmuteManager.TempFamiliarItem.mean.ToString(), false);
+        setUpDataElements("SD :", TransmuteManager.TempFamiliarItem.sd.ToString(), false);
+        setUpDataElements("Skew :", TransmuteManager.TempFamiliarItem.skew.ToString(), false);
         TransmutePanel.SetActive(true);
 
     }
@@ -146,7 +151,7 @@ public class Table_Plot_Panel : MonoBehaviour
 
     private void confirmTransmute()
     {
-        TransmuteManager._instance.TransmuteAddNew();
+        TransmuteManager.Instance.TransmuteAddNew();
         TransmutePanel.SetActive(false);
         foreach (Transform child in DataElementsHolder.transform)
         {
@@ -157,7 +162,7 @@ public class Table_Plot_Panel : MonoBehaviour
 
     private void cancelTransmute()
     {
-        TransmuteManager._instance.TransmuteEraseNew();
+        TransmuteManager.Instance.TransmuteEraseNew();
         TransmutePanel.SetActive(false);
         foreach (Transform child in DataElementsHolder.transform)
         {

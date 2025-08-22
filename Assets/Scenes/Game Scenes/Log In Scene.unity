@@ -258,7 +258,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6a1c738e2fc54b5aa9b5e2bb5556614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jsonPayload: submit_button
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
+  eventRef:
+    category: UI
+    key: start_game
   logOnButtonClick: 1
   logOnCollision: 0
   playerTag: Player
@@ -315,6 +318,7 @@ MonoBehaviour:
   supabaseUrl: https://pllursracuxqllyzgcvr.supabase.co
   anonKey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbHVyc3JhY3V4cWxseXpnY3ZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjE4NTUsImV4cCI6MjA1OTM5Nzg1NX0.-xr1Tu0HePRdRjfgXgBikrLCBClY3iIxOoznJaqJiJs
   logTable: game_events
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
 --- !u!1 &134654819
 GameObject:
   m_ObjectHideFlags: 0
@@ -2505,7 +2509,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 39809739666415362, guid: 810c0208abf6749b49dd5ed200c5d170,
         type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 39809739666415362, guid: 810c0208abf6749b49dd5ed200c5d170,
+        type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 39809739666415362, guid: 810c0208abf6749b49dd5ed200c5d170,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 39809739666415362, guid: 810c0208abf6749b49dd5ed200c5d170,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 39809739666415367, guid: 810c0208abf6749b49dd5ed200c5d170,
@@ -3074,6 +3093,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   destScene: TheLab
   spawnLocation: 0
+--- !u!114 &2081307549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 567326367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6a1c738e2fc54b5aa9b5e2bb5556614, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
+  eventRef:
+    category: Location
+    key: lab
+  logOnButtonClick: 1
+  logOnCollision: 0
+  playerTag: Player
 --- !u!1 &2081472289
 GameObject:
   m_ObjectHideFlags: 0

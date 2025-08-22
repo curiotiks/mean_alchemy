@@ -1,0 +1,193 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03825557c98154801b6554db35e3baab, type: 3}
+  m_Name: EventPayloadCatalog
+  m_EditorClassIdentifier: 
+  categories:
+  - name: UI
+    entries:
+    - key: start_game
+      action: click
+      target: start_game
+      description: The player has clicked the start game button
+    - key: exit_game
+      action: click
+      target: exit_game
+      description: The player has clicked the exit game button
+    - key: table_quit_button
+      action: click
+      target: table_quit
+      description: The player has clicked the quit button in the table
+    - key: table_quit_no
+      action: click
+      target: table_quit_no
+      description: The player has decided NOT to exit the table
+    - key: table_quit_yes
+      action: click
+      target: table_quit_yes
+      description: The player has decided to exit the table
+    - key: table_transmute
+      action: click
+      target: table_transmute
+      description: The player clicked the transmuate button on the table
+    - key: table_transmute_confirm
+      action: click
+      target: table_transmute_confirm
+      description: The player confirmed the transmutation
+    - key: table_transmute_cancel
+      action: click
+      target: table_transmute_cancel
+      description: The player cancelled the transmutation
+  - name: Location
+    entries:
+    - key: bounty_board
+      action: enter
+      target: toBountyBoard
+      description: The player has enter the gateway to the bounty board
+    - key: combat
+      action: enter
+      target: toCombat
+      description: The player has entered the gateway to the combat scene
+    - key: 'table '
+      action: enter
+      target: toTable
+      description: The player has entered the gateway to the table
+    - key: lab
+      action: enter
+      target: toLab
+      description: The player has entered the gateway to the lab
+  - name: Alchemy ADD Stones
+    entries:
+    - key: add_stone_one
+      action: click
+      target: add_1
+      description: Player added a 1 stone
+    - key: add_stone_two
+      action: click
+      target: add_2
+      description: Player added a 2 stone
+    - key: add_stone_three
+      action: click
+      target: add_3
+      description: Player added a 3 stone
+    - key: add_stone_four
+      action: click
+      target: add_4
+      description: Player added a 4 stone
+    - key: add_stone_five
+      action: click
+      target: add_5
+      description: Player added a 5 stone
+    - key: add_stone_six
+      action: click
+      target: add_6
+      description: Player added a 6 stone
+    - key: add_stone_seven
+      action: click
+      target: add_7
+      description: Player added a 7 stone
+    - key: add_stone_eight
+      action: click
+      target: add_8
+      description: Player added a 8 stone
+    - key: add_stone_nine
+      action: click
+      target: add_9
+      description: Player added a 9 stone
+    - key: add_stone_ten
+      action: click
+      target: add_10
+      description: Player added a 10 stone
+  - name: Alchemy DROP Stones
+    entries:
+    - key: drop_stone_one
+      action: click
+      target: drop_1
+      description: Player dropped a 1 stone
+    - key: drop_stone_two
+      action: click
+      target: drop_2
+      description: Player dropped a 2 stone
+    - key: drop_stone_three
+      action: click
+      target: drop_3
+      description: Player dropped a 3 stone
+    - key: drop_stone_four
+      action: click
+      target: drop_4
+      description: Player dropped a 4 stone
+    - key: drop_stone_five
+      action: click
+      target: drop_5
+      description: Player dropped a 5 stone
+    - key: drop_stone_six
+      action: click
+      target: drop_6
+      description: Player dropped a 6 stone
+    - key: drop_stone_seven
+      action: click
+      target: drop_7
+      description: Player dropped a 7 stone
+    - key: drop_stone_eight
+      action: click
+      target: drop_8
+      description: Player dropped a 8 stone
+    - key: drop_stone_nine
+      action: click
+      target: drop_9
+      description: Player dropped a 9 stone
+    - key: drop_stone_ten
+      action: click
+      target: drop_10
+      description: Player dropped a 10 stone
+  - name: Alchemy CLEAR Stones
+    entries:
+    - key: clear_stones_one
+      action: click
+      target: clear_all_1
+      description: Player cleared all 1 stones
+    - key: clear_stone_two
+      action: click
+      target: clear_all_2
+      description: Player cleared all 2 stones
+    - key: clear_stone_three
+      action: click
+      target: clear_all_3
+      description: Player cleared all 3 stones
+    - key: clear_stone_four
+      action: click
+      target: clear_all_4
+      description: Player cleared all 4 stones
+    - key: clear_stone_five
+      action: click
+      target: clear_all_5
+      description: Player cleared all 5 stones
+    - key: clear_stone_six
+      action: click
+      target: clear_all_6
+      description: Player cleared all 6 stones
+    - key: clear_stone_seven
+      action: click
+      target: clear_all_7
+      description: Player cleared all 7 stones
+    - key: clear_stone_eight
+      action: click
+      target: clear_all_8
+      description: Player cleared all 8 stones
+    - key: clear_stone_nine
+      action: click
+      target: clear_all_9
+      description: Player cleared all 9 stones
+    - key: clear_stone_ten
+      action: click
+      target: clear_all_10
+      description: Player cleared all 10 stones
