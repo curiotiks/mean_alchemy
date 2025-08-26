@@ -29,22 +29,32 @@ public class Table_Control_Panel : MonoBehaviour
         instance = this;
     }
 
+    /// <summary>
+    /// True if another stone can be added to the given column (1-based "num").
+    /// Source of truth for per-column capacity checks.
+    /// </summary>
+    public bool CanAddToColumn(int num)
+    {
+        if (plot_panel == null) return true; // be permissive if panel not set
+        int current = numbers_list.Count(x => x == num);
+        return current < plot_panel.max_stacked_count;
+    }
+
     void Update() {
         UpdateMeter();
     }
     
     public int updateInput(int num, bool isAdded = true){
         if (isAdded){
-            //if the numbers_list contains the certain number more than 10 elements, return
-            if(numbers_list.Count(x => x == num) >= plot_panel.max_stacked_count){
-                Debug.Log("numbers_list contains "+num +"more than "+ plot_panel.max_stacked_count +" elements");
-                // GET THE COUNT OF STONES IN THE LIST
-                return numbers_list.Count(x => x == num);
+            int countForNum = numbers_list.Count(x => x == num);
+            // if the numbers_list contains the given number equal/over the cap, early-out
+            if(plot_panel != null && countForNum >= plot_panel.max_stacked_count){
+                Debug.Log($"numbers_list contains {num} more than {plot_panel.max_stacked_count} elements");
+                return countForNum; // do not update visuals/statistics
             }
 
-
             Debug.Log("new input: "+num);
-                numbers_list.Add( num );
+            numbers_list.Add( num );
         }
         else
         {
@@ -131,15 +141,20 @@ public class Table_Control_Panel : MonoBehaviour
     // Adding method to calculate skewness coefficient
     private double CalculateSkewnessCoefficient()
     {
-        float sumCubedDeviations = 0f;
-        foreach (float number in numbers_list)
+        int n = numbers_list.Count;
+        if (n < 3) return 0.0; // not defined; return neutral
+        if (Math.Abs(sd) < 1e-6) return 0.0; // avoid division by zero when all values are equal
+
+        double meanLocal = numbers_list.Average();
+        double sumCubedDeviations = 0.0;
+        foreach (var v in numbers_list)
         {
-            float deviation = number - mean;
+            double deviation = v - meanLocal;
             sumCubedDeviations += deviation * deviation * deviation;
         }
-        float n = numbers_list.Count;
-        float numerator = (n / ((n - 1) * (n - 2))) * sumCubedDeviations;
-        float denominator = (float)System.Math.Pow(sd, 3);
+        double numerator = (n / ((double)(n - 1) * (n - 2))) * sumCubedDeviations;
+        double denominator = Math.Pow(sd, 3);
+        if (Math.Abs(denominator) < 1e-12) return 0.0;
         return numerator / denominator;
     }
 
@@ -164,6 +179,7 @@ public class Table_Control_Panel : MonoBehaviour
         meterArrow.transform.rotation = targetRotation;
     }
 
+    /// <summary>Clears the data model and resets the plot and stats.</summary>
     public void resetNumbers(){
         numbers_list.Clear();
         mean = 0;

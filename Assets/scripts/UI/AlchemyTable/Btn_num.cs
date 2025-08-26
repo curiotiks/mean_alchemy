@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using DG.Tweening;
 
 public class Btn_num : MonoBehaviour, IClickLoggingGate
 {
@@ -38,7 +37,7 @@ public class Btn_num : MonoBehaviour, IClickLoggingGate
         text_ui = GetComponentInChildren<TextMeshProUGUI>(true) as TextMeshProUGUI;
         text_ui.enableAutoSizing = true;
         text_ui.text = num+"";
-        item_count_text.enabled = true;
+        if (item_count_text) item_count_text.enabled = true;
         #endregion
 
         btn = GetComponent<Button>();
@@ -54,31 +53,27 @@ public class Btn_num : MonoBehaviour, IClickLoggingGate
 
     void buttonHandler(int num)
     {
-        this.transform.localScale = Vector3.one;
-        this.transform.DOScale(Vector3.one * 1.2f, 0.05f).SetLoops(2, LoopType.Yoyo).SetId(GetHashCode());
-
-        //re-check
         if (num < 1) return;
 
-        int cap = table_plot_panel != null ? table_plot_panel.max_stacked_count : int.MaxValue;
-        if (elementButtonCount >= cap)
+        // Ask the data model if we can add (source of truth)
+        if (table_control_panel != null && !table_control_panel.CanAddToColumn(num))
         {
             lastAddSucceeded = false;
+            int cap = table_plot_panel != null ? table_plot_panel.max_stacked_count : 0;
             Debug.LogWarning($"Column {num} is at max capacity ({cap}). Ignoring click.");
             return;
         }
 
-        //table_control_panel.updateInput(num);
         lastAddSucceeded = true;
+        int newCount = table_control_panel != null ? table_control_panel.updateInput(num) : elementButtonCount + 1;
+        UpdateItemText(newCount);
 
-        // Log a successful stone add (separate from the generic ButtonLoggerConnector click)
+        // Log only after a successful add
         var logger = GameLogger.Instance != null ? GameLogger.Instance : FindObjectOfType<GameLogger>();
         if (logger != null && !string.IsNullOrEmpty(addStoneEvent.category) && !string.IsNullOrEmpty(addStoneEvent.key))
         {
             logger.LogEvent(addStoneEvent);
         }
-
-        UpdateItemText(table_control_panel.updateInput(num));
     }
 
     public void UpdateItemText(int num)

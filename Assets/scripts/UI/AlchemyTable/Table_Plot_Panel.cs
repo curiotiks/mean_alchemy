@@ -9,6 +9,16 @@ public class Table_Plot_Panel : MonoBehaviour
 { 
     private List<VerticalLayoutGroup> vertical_layout_group_list = new List<VerticalLayoutGroup>();
     public int max_stacked_count = 10;
+
+    [Header("Columns Root (optional)")]
+    [Tooltip("If set, columns will be discovered only under this transform. If null, a child named 'Columns' will be used if found; otherwise all VerticalLayoutGroups under this object are used.")]
+    [SerializeField] private RectTransform columnsRoot;
+
+    [Header("Chip Prefab & Columns")]
+    [SerializeField] private GameObject chipPrefab; // Prefab with Image (+ optional Button) + StoneChip
+    [Tooltip("Optional: Per-stone prefab variants. Index 0 => stone 1, index 9 => stone 10.")]
+    [SerializeField] private GameObject[] chipPrefabs; // size 10 recommended
+
     public TextMeshProUGUI y_axis;
 
     [Header("TRANSMUTE")]
@@ -20,18 +30,52 @@ public class Table_Plot_Panel : MonoBehaviour
     [SerializeField] Button ConfirmTransmuteButton;
     [SerializeField] Button CancelTransmuteButton;
 
+    [Header("Logging")] 
+    [SerializeField] private EventPayloadCatalog catalog;
+    [SerializeField] private EventRef chipRemovedEvent; // Catalog event for chip removal
+
+    // Runtime stacks: one list of chips per column
+    private List<List<StoneChip>> columnChips = new List<List<StoneChip>>();
+
 
     void Start() { 
-        //find all vertical layout group
-        //vertical layout group is placed in each numbered block
-        y_axis.text = max_stacked_count.ToString();
-        foreach(var x in GetComponentsInChildren<VerticalLayoutGroup>()){
-            vertical_layout_group_list.Add(x);
-        } 
-        //validate if the number of vertical layout group is 10
-        if(vertical_layout_group_list.Count != 10){
-            Debug.Log("vertical layout group count is not 10");
+        // Discover column parents (prefer the explicit Columns root or a child named "Columns")
+        vertical_layout_group_list.Clear();
+        Transform searchRoot = transform;
+        if (columnsRoot != null) searchRoot = columnsRoot;
+        else
+        {
+            var child = transform.Find("Columns");
+            if (child != null) searchRoot = child;
         }
+
+        // Prefer only direct children of the root that have a VerticalLayoutGroup
+        for (int i = 0; i < searchRoot.childCount; i++)
+        {
+            var t = searchRoot.GetChild(i);
+            var vlg = t.GetComponent<VerticalLayoutGroup>();
+            if (vlg != null) vertical_layout_group_list.Add(vlg);
+        }
+
+        // Fallback: scan all descendants if none found as direct children (legacy scenes)
+        if (vertical_layout_group_list.Count == 0)
+        {
+            foreach (var x in searchRoot.GetComponentsInChildren<VerticalLayoutGroup>(true))
+                vertical_layout_group_list.Add(x);
+        }
+
+        // Diagnostics
+        if (vertical_layout_group_list.Count != 10)
+        {
+            Debug.LogWarning($"Table_Plot_Panel: Expected 10 columns, found {vertical_layout_group_list.Count}. Root='{searchRoot.name}'.");
+        }
+        else
+        {
+            string names = string.Join(", ", vertical_layout_group_list.ConvertAll(v => v.transform.name));
+            Debug.Log($"Table_Plot_Panel: Columns detected: {names}");
+        }
+
+        y_axis.text = max_stacked_count.ToString();
 
         DataElements.Clear();
 
@@ -44,65 +88,93 @@ public class Table_Plot_Panel : MonoBehaviour
         CancelTransmuteButton.onClick.RemoveAllListeners();
         CancelTransmuteButton.onClick.AddListener(cancelTransmute);
 
-        instantiateVerticalLayoutGroups();
+        // Initialize per-column chip stacks to match the found column groups
+        columnChips.Clear();
+        for (int i = 0; i < vertical_layout_group_list.Count; i++)
+            columnChips.Add(new List<StoneChip>());
     } 
 
-    public void instantiateVerticalLayoutGroups(){
-        int num_for_name = 1;
-        foreach (VerticalLayoutGroup x in vertical_layout_group_list){
-            //find imge from numbers_panel buttons
-            GameObject img_obj = GameObject.Find("btn_num_" + num_for_name);
-            // Debug.Log("img_obj" + img_obj);
-            
-            //add a new gameobject to the vertical layout group
-            for (int i = 0; i < max_stacked_count; i++){
-                GameObject new_obj = new GameObject();
-                new_obj.name = "componentVerticalLayout_"+num_for_name + "_" + i;
-                new_obj.AddComponent<RectTransform>();
-                new_obj.transform.SetParent(x.transform);
-                new_obj.AddComponent<Image>();
-                new_obj.GetComponent<Image>().sprite = img_obj.GetComponent<Image>().sprite;
-                //set image transparent
-                new_obj.GetComponent<Image>().color = new Color(1,1,1,0);
-                new_obj.AddComponent<Button>();
-                Button btn = new_obj.GetComponent<Button>();
-                btn.interactable = false;
-                btn.onClick.AddListener(() => {
-                Table_Control_Panel.instance.updateInput(int.Parse(new_obj.name.Split('_')[1]), false);
-               
-                });
-            }
-            num_for_name++;
+    public void drawPlot(int num, bool isAdded){
+        // num is 1-based in current callers; convert to 0-based index
+        int col = Mathf.Clamp(num - 1, 0, vertical_layout_group_list.Count - 1);
+        if (isAdded)
+        {
+            AddChip(col, num);
+        }
+        else
+        {
+            RemoveLastChip(col);
         }
     }
 
+    private void AddChip(int columnIndex, int stoneValue)
+    {
+        // Ok if chipPrefab is null when variants are provided; we'll choose below
+        if (columnIndex < 0 || columnIndex >= vertical_layout_group_list.Count) return;
 
-    public void drawPlot(int num, bool isAdded){
-        // Debug.Log("drawPlot: "+num+" "+isAdded);
-        //find the vertical layout group
-        VerticalLayoutGroup vlg = vertical_layout_group_list[num-1];
-        //if isAdded is true, find the last child which the image is not transparent is disabled and set the image component tranparent and enable the button.
-        if(isAdded){
-            for (int i = vlg.transform.childCount - 1; i >= 0; i--){
-                Transform child = vlg.transform.GetChild(i);
-                if (child.GetComponent<Image>().color.a == 0){
-                    child.GetComponent<Image>().color = new Color(1,1,1,1);
-                    child.GetComponent<Button>().interactable = true;
-                    break;
-                }
+        var colList = columnChips[columnIndex];
+        if (max_stacked_count > 0 && colList.Count >= max_stacked_count)
+        {
+            Debug.LogWarning($"Column {columnIndex + 1} is at max capacity ({max_stacked_count}).");
+            return;
+        }
+
+        Transform parent = vertical_layout_group_list[columnIndex].transform;
+        if (parent == null)
+        {
+            Debug.LogError($"Table_Plot_Panel: Column parent at index {columnIndex} is null.");
+            return;
+        }
+
+        // Prefer a per-stone variant if provided; fallback to the single chipPrefab
+        GameObject prefabToUse = chipPrefab;
+        if (chipPrefabs != null && chipPrefabs.Length > 0)
+        {
+            int idx = stoneValue - 1; // stone values are 1..10
+            if (idx >= 0 && idx < chipPrefabs.Length && chipPrefabs[idx] != null)
+            {
+                prefabToUse = chipPrefabs[idx];
             }
         }
-        else{
-            //if isAdded is false, find the last child which the image is not transparent and set the image component tranparent and disable the button.
-            for (int i = 0; i < vlg.transform.childCount; i++){
-                Transform child = vlg.transform.GetChild(i);
-                if (child.GetComponent<Image>().color.a != 0){
-                    child.GetComponent<Image>().color = new Color(1,1,1,0);
-                    child.GetComponent<Button>().interactable = false;
-                    break;
-                }
-            }
+
+        if (prefabToUse == null)
+        {
+            Debug.LogError("Table_Plot_Panel: No prefab assigned (chipPrefabs entry and chipPrefab are both null).");
+            return;
         }
+
+        GameObject go = Instantiate(prefabToUse, parent);
+        var chip = go.GetComponent<StoneChip>();
+        if (chip == null) chip = go.AddComponent<StoneChip>();
+
+        chip.Init(stoneValue, columnIndex, chipRemovedEvent, HandleChipRemoveRequest);
+        colList.Add(chip);
+    }
+
+    private void RemoveLastChip(int columnIndex)
+    {
+        if (columnIndex < 0 || columnIndex >= columnChips.Count) return;
+        var colList = columnChips[columnIndex];
+        if (colList.Count == 0) return;
+
+        var chip = colList[colList.Count - 1];
+        colList.RemoveAt(colList.Count - 1);
+
+        // Log removal via catalog before destroy (so failures are obvious)
+        var logger = GameLogger.Instance ?? FindObjectOfType<GameLogger>();
+        if (logger != null && !string.IsNullOrEmpty(chipRemovedEvent.category) && !string.IsNullOrEmpty(chipRemovedEvent.key))
+        {
+            logger.LogEvent(chipRemovedEvent);
+        }
+
+        chip.DestroyImmediateSafe();
+    }
+
+    private void HandleChipRemoveRequest(StoneChip chip)
+    {
+        // The chip was clicked; delegate to your existing data pathway so UI+data stay in sync.
+        // Table_Control_Panel is expected to call drawPlot(num,false) afterward.
+        Table_Control_Panel.instance.updateInput(chip.columnIndex + 1, false);
     }
 
     public void resetPlot(){
