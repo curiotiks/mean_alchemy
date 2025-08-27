@@ -116,13 +116,13 @@ PrefabInstance:
     - target: {fileID: 7240781322247981391, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: m_Name
-      value: StoneChip_07
+      value: StoneChip_04
       objectReference: {fileID: 0}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: idleSprite
       value: 
-      objectReference: {fileID: 21300000, guid: e9653d94219024361b2e51adac68a761,
+      objectReference: {fileID: 21300000, guid: 1db057459cef84f919cf2849b7b893a3,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
@@ -133,38 +133,43 @@ PrefabInstance:
         type: 3}
       propertyPath: spawnFrames.Array.data[0]
       value: 
-      objectReference: {fileID: 21300000, guid: e9d67b7fda77641fda8ae460b1c92a74,
+      objectReference: {fileID: 21300000, guid: 924bac598535f4f0bbb41156af911881,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[1]
       value: 
-      objectReference: {fileID: 21300000, guid: be57a79bdadc8414da57a5a6051358f1,
+      objectReference: {fileID: 21300000, guid: c4a88ae62868440aa99ffd2b941ff81f,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[2]
       value: 
-      objectReference: {fileID: 21300000, guid: b9d96d75277ae417bae45e9f208f5290,
+      objectReference: {fileID: 21300000, guid: bb9db17fb2afa45598ea47e5e68d36f0,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[3]
       value: 
-      objectReference: {fileID: 21300000, guid: b1a9ad78b4fa84986a8f129db80f713d,
+      objectReference: {fileID: 21300000, guid: 7bedb0da947c04524b46b46719406e0c,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[4]
       value: 
-      objectReference: {fileID: 21300000, guid: c119b2b3ee09e49b39a6031299c33964,
+      objectReference: {fileID: 21300000, guid: 3209375b6249e4286abbc563b0cecd44,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[5]
       value: 
-      objectReference: {fileID: 21300000, guid: e9653d94219024361b2e51adac68a761,
+      objectReference: {fileID: 21300000, guid: 1db057459cef84f919cf2849b7b893a3,
         type: 3}
+    - target: {fileID: 8902160884194069545, guid: 7d30921598b7b449483c23f020d913bc,
+        type: 3}
+      propertyPath: removeEvent.key
+      value: drop_stone_four
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 7d30921598b7b449483c23f020d913bc, type: 3}

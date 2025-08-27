@@ -165,6 +165,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 289099d686b9a48f7a0401ee04f34ae4,
         type: 3}
+    - target: {fileID: 8902160884194069545, guid: 7d30921598b7b449483c23f020d913bc,
+        type: 3}
+      propertyPath: removeEvent.key
+      value: drop_stone_six
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 7d30921598b7b449483c23f020d913bc, type: 3}

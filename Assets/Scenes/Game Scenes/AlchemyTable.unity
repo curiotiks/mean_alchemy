@@ -787,7 +787,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 200, y: 70}
+  m_AnchoredPosition: {x: 131, y: 70}
   m_SizeDelta: {x: 100, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &114422469
@@ -6861,10 +6861,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   max_stacked_count: 7
-  chipPrefab: {fileID: 7240781322247981391, guid: 7d30921598b7b449483c23f020d913bc,
-    type: 3}
+  columnsRoot: {fileID: 1282805106}
+  chipPrefab: {fileID: 0}
   chipPrefabs:
-  - {fileID: 0}
+  - {fileID: 6988551318405511195, guid: d04243166ab534767b2f883161806915, type: 3}
+  - {fileID: 6988551318405511195, guid: cf764a596d97241948583aba7a7ab861, type: 3}
+  - {fileID: 6988551318405511195, guid: 97021136026c44b159c97369759075fa, type: 3}
+  - {fileID: 6988551318405511195, guid: 284adf82de0dd490b9ed15729dad3c56, type: 3}
+  - {fileID: 6988551318405511195, guid: 021dae51f498b4228a442e1de23d66db, type: 3}
+  - {fileID: 6988551318405511195, guid: 63b5f4d04b6114b91ad773638abcac3f, type: 3}
+  - {fileID: 6988551318405511195, guid: 44df3690a6dde40af8e1d00218cb6d80, type: 3}
+  - {fileID: 6988551318405511195, guid: fa1284ac9bdb74d159d8c71aebb9688b, type: 3}
+  - {fileID: 6988551318405511195, guid: 5caf143573830409a96119d6b9547b12, type: 3}
+  - {fileID: 6988551318405511195, guid: 7ea2aa6ab46b84b028218f2de1120b3c, type: 3}
   y_axis: {fileID: 1413382510}
   TransmutePanel: {fileID: 95641278}
   DataElementsHolder: {fileID: 848644450}
@@ -10096,7 +10105,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -109.89252, y: -23}
+  m_AnchoredPosition: {x: -109.8925, y: -23}
   m_SizeDelta: {x: -305.78503, y: 424.71}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1282805107
@@ -10132,14 +10141,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1282805105}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0.49056602, b: 0.35771143, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -15104,7 +15113,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 200, y: 20}
+  m_AnchoredPosition: {x: 130.99997, y: 20}
   m_SizeDelta: {x: 120, y: 45}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1797186196

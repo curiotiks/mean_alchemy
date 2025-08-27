@@ -8,21 +8,6 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 156291679477270214, guid: 7d30921598b7b449483c23f020d913bc,
-        type: 3}
-      propertyPath: m_Color.b
-      value: 0.18031871
-      objectReference: {fileID: 0}
-    - target: {fileID: 156291679477270214, guid: 7d30921598b7b449483c23f020d913bc,
-        type: 3}
-      propertyPath: m_Color.g
-      value: 0.1462264
-      objectReference: {fileID: 0}
-    - target: {fileID: 156291679477270214, guid: 7d30921598b7b449483c23f020d913bc,
-        type: 3}
-      propertyPath: m_Color.r
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7051342281690379849, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: m_Pivot.x
@@ -131,13 +116,13 @@ PrefabInstance:
     - target: {fileID: 7240781322247981391, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: m_Name
-      value: StoneChip_10
+      value: StoneChip_01
       objectReference: {fileID: 0}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: idleSprite
       value: 
-      objectReference: {fileID: 21300000, guid: f1dc16ccf46144de4bd5acd7acc5eccc,
+      objectReference: {fileID: 21300000, guid: 2dd71cab5f2984a02b2e358879306593,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
@@ -148,38 +133,43 @@ PrefabInstance:
         type: 3}
       propertyPath: spawnFrames.Array.data[0]
       value: 
-      objectReference: {fileID: 21300000, guid: 33fd96ac282dd4908a8e55326f3a6527,
+      objectReference: {fileID: 21300000, guid: beadef981b8ce4b5ba7076db92a1c41d,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[1]
       value: 
-      objectReference: {fileID: 21300000, guid: 8c065b10969dc435f85e4bbc0f53a8dc,
+      objectReference: {fileID: 21300000, guid: 258ca0b5219694209b276ea3e8e38c00,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[2]
       value: 
-      objectReference: {fileID: 21300000, guid: 4d5736d8353d64252bb15853e0c640bb,
+      objectReference: {fileID: 21300000, guid: ec662856843fd4a8b98b34ac9e8fe8c0,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[3]
       value: 
-      objectReference: {fileID: 21300000, guid: bdfae0d4c36214f8cbcb30c52a09f120,
+      objectReference: {fileID: 21300000, guid: c2a526beb254d4ed48295065a33ec18e,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[4]
       value: 
-      objectReference: {fileID: 21300000, guid: 2a00c5c864c164eb4ad1ae77edbcaba1,
+      objectReference: {fileID: 21300000, guid: 206f719808c4b4d47ba95ba7ea8f2d72,
         type: 3}
     - target: {fileID: 7638540733847099434, guid: 7d30921598b7b449483c23f020d913bc,
         type: 3}
       propertyPath: spawnFrames.Array.data[5]
       value: 
-      objectReference: {fileID: 21300000, guid: f1dc16ccf46144de4bd5acd7acc5eccc,
+      objectReference: {fileID: 21300000, guid: 2dd71cab5f2984a02b2e358879306593,
         type: 3}
+    - target: {fileID: 8902160884194069545, guid: 7d30921598b7b449483c23f020d913bc,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 7d30921598b7b449483c23f020d913bc, type: 3}

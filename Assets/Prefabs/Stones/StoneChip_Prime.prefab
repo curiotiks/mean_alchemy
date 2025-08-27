@@ -10,10 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 7051342281690379849}
   - component: {fileID: 1603982791362038767}
+  - component: {fileID: -2920075637951436320}
   - component: {fileID: 156291679477270214}
   - component: {fileID: 5890309433139534547}
   - component: {fileID: 8902160884194069545}
   - component: {fileID: 7638540733847099434}
+  - component: {fileID: 594853666853979898}
   m_Layer: 5
   m_Name: StoneChip_Prime
   m_TagString: Untagged
@@ -49,6 +51,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7240781322247981391}
   m_CullTransparentMesh: 1
+--- !u!114 &-2920075637951436320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7240781322247981391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 0}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &156291679477270214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,16 +152,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7240781322247981391}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44aef7357516944b49686ed64df117dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   value: 0
   columnIndex: 0
-  removeEvent:
-    category: 
-    key: 
 --- !u!114 &7638540733847099434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,3 +176,22 @@ MonoBehaviour:
   frameRate: 10
   playOnSpawn: 1
   idleSprite: {fileID: 0}
+--- !u!114 &594853666853979898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7240781322247981391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6a1c738e2fc54b5aa9b5e2bb5556614, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
+  eventRef:
+    category: Alchemy DROP Stones
+    key: drop_stone_one
+  logOnButtonClick: 1
+  logOnCollision: 0
+  playerTag: Player

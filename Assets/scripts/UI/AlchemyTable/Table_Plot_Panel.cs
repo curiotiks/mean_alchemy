@@ -144,10 +144,12 @@ public class Table_Plot_Panel : MonoBehaviour
         }
 
         GameObject go = Instantiate(prefabToUse, parent);
+        // Place newest chip at the top (first child) so animation plays on the newest
+        go.transform.SetSiblingIndex(0);
         var chip = go.GetComponent<StoneChip>();
         if (chip == null) chip = go.AddComponent<StoneChip>();
 
-        chip.Init(stoneValue, columnIndex, chipRemovedEvent, HandleChipRemoveRequest);
+        chip.Init(stoneValue, columnIndex, HandleChipRemoveRequest);
         colList.Add(chip);
     }
 
@@ -160,21 +162,35 @@ public class Table_Plot_Panel : MonoBehaviour
         var chip = colList[colList.Count - 1];
         colList.RemoveAt(colList.Count - 1);
 
-        // Log removal via catalog before destroy (so failures are obvious)
-        var logger = GameLogger.Instance ?? FindObjectOfType<GameLogger>();
-        if (logger != null && !string.IsNullOrEmpty(chipRemovedEvent.category) && !string.IsNullOrEmpty(chipRemovedEvent.key))
-        {
-            logger.LogEvent(chipRemovedEvent);
-        }
+        chip.DestroyImmediateSafe();
+    }
 
+    // Currently unused; kept for future direct-removal flows
+    private void RemoveChipInstance(StoneChip chip)
+    {
+        if (chip == null) return;
+        int columnIndex = chip.columnIndex;
+        if (columnIndex < 0 || columnIndex >= columnChips.Count)
+        {
+            // Fallback: just destroy if we can't resolve the column safely
+            chip.DestroyImmediateSafe();
+            return;
+        }
+        var colList = columnChips[columnIndex];
+        int idx = colList.IndexOf(chip);
+        if (idx >= 0)
+        {
+            colList.RemoveAt(idx);
+        }
         chip.DestroyImmediateSafe();
     }
 
     private void HandleChipRemoveRequest(StoneChip chip)
     {
-        // The chip was clicked; delegate to your existing data pathway so UI+data stay in sync.
-        // Table_Control_Panel is expected to call drawPlot(num,false) afterward.
-        Table_Control_Panel.instance.updateInput(chip.columnIndex + 1, false);
+        // Defer to the data model; it will call drawPlot(num,false) which invokes RemoveLastChip
+        if (Table_Control_Panel.instance != null)
+            Table_Control_Panel.instance.updateInput(chip.columnIndex + 1, false);
+        // Do NOT call RemoveChipInstance here; that causes a second removal.
     }
 
     public void resetPlot(){
