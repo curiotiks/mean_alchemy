@@ -3108,7 +3108,7 @@ MonoBehaviour:
   catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
   eventRef:
     category: Location
-    key: lab
+    key: 'table '
   logOnButtonClick: 1
   logOnCollision: 0
   playerTag: Player

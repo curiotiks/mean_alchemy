@@ -914,8 +914,8 @@ GameObject:
   - component: {fileID: 148225350}
   - component: {fileID: 148225354}
   - component: {fileID: 148225353}
-  - component: {fileID: 148225355}
   - component: {fileID: 148225351}
+  - component: {fileID: 148225355}
   - component: {fileID: 148225356}
   m_Layer: 5
   m_Name: Deletebtn_num_1
@@ -1042,6 +1042,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &148225356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2539,6 +2543,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &263318726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3998,6 +4006,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &490966649
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4829,6 +4841,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &609345466
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7606,6 +7622,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &974372915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7764,6 +7784,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &980009379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9293,6 +9317,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &1189149093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13598,6 +13626,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &1591171085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15548,6 +15580,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &1869574407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17638,6 +17674,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btn: {fileID: 0}
   buttonNumber: 0
+  iconToShake: {fileID: 0}
+  shakeDuration: 0.25
+  shakeDistance: 6
+  shakeVibrato: 10
 --- !u!114 &2060374820
 MonoBehaviour:
   m_ObjectHideFlags: 0
