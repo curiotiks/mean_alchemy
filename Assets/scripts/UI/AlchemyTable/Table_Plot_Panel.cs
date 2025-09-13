@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 
 public class Table_Plot_Panel : MonoBehaviour
-{ 
+{
     private List<VerticalLayoutGroup> vertical_layout_group_list = new List<VerticalLayoutGroup>();
     public int max_stacked_count = 10;
 
@@ -30,7 +30,8 @@ public class Table_Plot_Panel : MonoBehaviour
     [SerializeField] Button ConfirmTransmuteButton;
     [SerializeField] Button CancelTransmuteButton;
 
-    [Header("Logging")] 
+
+    [Header("Logging")]
     [SerializeField] private EventPayloadCatalog catalog;
     [SerializeField] private EventRef chipRemovedEvent; // Catalog event for chip removal
 
@@ -38,7 +39,8 @@ public class Table_Plot_Panel : MonoBehaviour
     private List<List<StoneChip>> columnChips = new List<List<StoneChip>>();
 
 
-    void Start() { 
+    void Start()
+    {
         // Discover column parents (prefer the explicit Columns root or a child named "Columns")
         vertical_layout_group_list.Clear();
         Transform searchRoot = transform;
@@ -92,9 +94,10 @@ public class Table_Plot_Panel : MonoBehaviour
         columnChips.Clear();
         for (int i = 0; i < vertical_layout_group_list.Count; i++)
             columnChips.Add(new List<StoneChip>());
-    } 
+    }
 
-    public void drawPlot(int num, bool isAdded){
+    public void drawPlot(int num, bool isAdded)
+    {
         // num is 1-based in current callers; convert to 0-based index
         int col = Mathf.Clamp(num - 1, 0, vertical_layout_group_list.Count - 1);
         if (isAdded)
@@ -193,7 +196,8 @@ public class Table_Plot_Panel : MonoBehaviour
         // Do NOT call RemoveChipInstance here; that causes a second removal.
     }
 
-    public void resetPlot(){
+    public void resetPlot()
+    {
         // foreach(var x in plot_item_list){
         //     RectTransform rt = x.GetComponent<RectTransform>();
         //     rt.sizeDelta = new Vector2(rt.sizeDelta.x, 0);
@@ -202,9 +206,9 @@ public class Table_Plot_Panel : MonoBehaviour
 
     private void setUpTransmutePanel()
     {
-        if(!TransmutePanel)
-        { 
-            return; 
+        if (!TransmutePanel)
+        {
+            return;
         }
 
         TransmuteManager.Instance.TransmuteMakeNew();
@@ -246,6 +250,11 @@ public class Table_Plot_Panel : MonoBehaviour
             DataElements.Remove(child.gameObject);
             GameObject.Destroy(child.gameObject);
         }
+        Debug.Log("Transmute confirmed. Returning to Alchemy Table.");
+        Debug.Log(SceneNames.AlchemyTable);
+
+        SceneManager.LoadScene(SceneNames.TheLab); // Always return to Alchemy Table after transmute
+
     }
 
     private void cancelTransmute()
@@ -258,4 +267,17 @@ public class Table_Plot_Panel : MonoBehaviour
             GameObject.Destroy(child.gameObject);
         }
     }
+
+    // private string ResolveSceneName()
+    // {
+    //     switch (destination)
+    //     {
+    //         case QuitTarget.AlchemyTable: return SceneNames.AlchemyTable;
+    //         case QuitTarget.TheLab: return SceneNames.TheLab;
+    //         case QuitTarget.BountyBoard: return SceneNames.BountyBoard;
+    //         case QuitTarget.CombatArena: return SceneNames.CombatArena;
+    //         case QuitTarget.WorldMap: return SceneNames.WorldMap;
+    //         default: return SceneNames.AlchemyTable;
+    //     }
+    // }
 }
