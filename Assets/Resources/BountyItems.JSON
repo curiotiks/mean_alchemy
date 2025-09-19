@@ -1,0 +1,126 @@
+{
+  "bountyItems": [
+    {
+      "name": "Dragon Hunt",
+      "imagePath": "Sprites/Dragon",
+      "mean": 12.5,
+      "sd": 3.2,
+      "difficulty" : "Easy",
+      "rewardList": [
+        { "type": 0, "amount": 500 },
+        { "type": 1, "amount": 200 }
+      ]
+    },
+    {
+      "name": "Bandit Cleanup",
+      "imagePath": "Sprites/Bandit",
+      "mean": 8.0,
+      "sd": 1.5,
+      "difficulty" : "Easy",
+      "rewardList": [
+        { "type": 0, "amount": 250 },
+        { "type": 2, "amount": 30 }
+      ]
+    },
+    {
+      "name": "Lost Relic",
+      "imagePath": "Sprites/Relic",
+      "mean": 15.0,
+      "sd": 4.0,
+      "difficulty" : "Easy",
+      "rewardList": [
+        { "type": 0, "amount": 800 },
+        { "type": 1, "amount": 400 },
+        { "type": 2, "amount": 50 }
+      ]
+    },
+    {
+      "name": "Goblin Raid",
+      "imagePath": "Sprites/Goblin",
+      "mean": 5.5,
+      "sd": 1.0,
+      "difficulty" : "Easy",
+      "rewardList": [
+        { "type": 0, "amount": 150 }
+      ]
+    },
+    {
+      "name": "Ancient Curse",
+      "imagePath": "Sprites/Curse",
+      "mean": 20.0,
+      "sd": 5.0,
+      "difficulty" : "Medium",
+      "rewardList": [
+        { "type": 1, "amount": 600 },
+        { "type": 2, "amount": 80 }
+      ]
+    },
+    {
+      "name": "Wolf Pack",
+      "imagePath": "Sprites/Wolf",
+      "mean": 7.0,
+      "sd": 1.8,
+      "difficulty" : "Medium",
+      "rewardList": [
+        { "type": 0, "amount": 180 },
+        { "type": 1, "amount": 90 }
+      ]
+    },
+    {
+      "name": "Haunted Ruins",
+      "imagePath": "Sprites/Ghost",
+      "mean": 18.0,
+      "sd": 4.5,
+      "difficulty" : "Medium",
+      "rewardList": [
+        { "type": 2, "amount": 70 }
+      ]
+    },
+    {
+      "name": "Treasure Hunt",
+      "imagePath": "Sprites/Treasure",
+      "mean": 10.0,
+      "sd": 2.0,
+      "difficulty" : "Hard",
+      "rewardList": [
+        { "type": 0, "amount": 1000 }
+      ]
+    },
+    {
+      "name": "Mysterious Stranger",
+      "imagePath": "Sprites/Stranger",
+      "mean": 25.0,
+      "sd": 6.0,
+      "difficulty" : "Hard",
+      "rewardList": [
+        { "type": 0, "amount": 1500 },
+        { "type": 1, "amount": 800 },
+        { "type": 2, "amount": 100 }
+      ]
+    },
+    {
+      "name": "Mysterious Stranger",
+      "imagePath": "Sprites/Stranger",
+      "mean": 25.0,
+      "sd": 6.0,
+      "difficulty" : "Hard",
+      "rewardList": [
+        { "type": 0, "amount": 1500 },
+        { "type": 1, "amount": 800 },
+        { "type": 2, "amount": 100 }
+      ]
+    },
+    {
+      "name": "Dragon's Lair",
+      "imagePath": "Sprites/DragonLair",
+      "mean": 30.0,
+      "sd": 7.0,
+      "difficulty" : "Hard",
+      "rewardList": [
+        { "type": 0, "amount": 2000 },
+        { "type": 1, "amount": 1000 },
+        { "type": 2, "amount": 150 }
+      ]
+    }
+  ]
+}

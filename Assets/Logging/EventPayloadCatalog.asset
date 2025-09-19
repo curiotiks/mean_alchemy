@@ -191,3 +191,28 @@ MonoBehaviour:
       action: click
       target: clear_all_10
       description: Player cleared all 10 stones
+  - name: Combat
+    entries:
+    - key: battle_report
+      action: report
+      target: report_summary
+      description: Full battle report with summary + turn-by-turn details. Data is
+        built in CombatManager.
+  - name: Bounty Board
+    entries:
+    - key: view_card
+      action: click
+      target: view_bounty_card
+      description: 'Player clicked on a bounty card to view it. '
+    - key: close_card
+      action: click
+      target: close_bounty_card
+      description: 'Player closed a card being viewed using the exit button. '
+    - key: select_bounty
+      action: click
+      target: select_bounty_card
+      description: 'Player selected a card being viewed. '
+    - key: abandon_bounty
+      action: click
+      target: abandon_bounty_card
+      description: 'Player abandoned a card that had been selected. '

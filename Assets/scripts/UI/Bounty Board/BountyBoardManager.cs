@@ -7,16 +7,32 @@ using System;
 using UnityEngine.SceneManagement;
 using TrollBridge;
 using UnityEngine.Assertions.Must;
+using UnityEngine.Networking;
 
 public class BountyBoardManager : MonoBehaviour
 {
     public static BountyBoardManager instance;
 
+    public enum BountyDataSource { Resources, StreamingAssets, PersistentData }
+
+    [Header("Bounty Data Source")]
+    [Tooltip("Where to load BountyItems.json from. Resources = Assets/Resources/<Resource Path>. StreamingAssets = Assets/StreamingAssets/<Relative Path>. PersistentData = Application.persistentDataPath/<File Name>.")]
+    [SerializeField] private BountyDataSource dataSource = BountyDataSource.Resources;
+
+    [Tooltip("For Resources: path under Assets/Resources without extension. Example: Data/BountyItems")] 
+    [SerializeField] private string resourcesPath = "Data/BountyItems";
+
+    [Tooltip("For StreamingAssets: relative path under Assets/StreamingAssets, e.g., Data/BountyItems.json")] 
+    [SerializeField] private string streamingAssetsRelativePath = "Data/BountyItems.json";
+
+    [Tooltip("For PersistentData: file name used under Application.persistentDataPath")] 
+    [SerializeField] private string persistentFileName = "BountyItems.json";
+
     [field: SerializeField] public bool shouldDestroyOnLoad { get; private set; }
 
-    [Header("JSON Handler")]
-    [SerializeField] string bountyFileName = "BountyItems";
-    [SerializeField] string BountyFilePath/* => Path.Combine(Application.persistentDataPath, bountyFileName)*/;
+    [Header("JSON Handler (Legacy Persistent Save Support)")]
+    [SerializeField] string bountyFileName = "BountyItems.json"; // used for PersistentData
+    [SerializeField] string BountyFilePath; // resolved at runtime for PersistentData
 
     [SerializeField] GameObject CardHolderParent;
     [SerializeField] GameObject selectedCardPanel;
@@ -29,7 +45,8 @@ public class BountyBoardManager : MonoBehaviour
 
     private void Awake()
     {
-        BountyFilePath = Path.Combine(Application.persistentDataPath, bountyFileName);
+        if (dataSource == BountyDataSource.PersistentData)
+            BountyFilePath = Path.Combine(Application.persistentDataPath, string.IsNullOrEmpty(persistentFileName) ? bountyFileName : persistentFileName);
         if (instance == null)
         {
             instance = this;
@@ -115,19 +132,22 @@ public class BountyBoardManager : MonoBehaviour
 
     public void SaveBountyItemToJson(BountyItem item)
     {
+        // Only persist to PersistentData to avoid modifying project assets at runtime
+        string fullPath = Path.Combine(Application.persistentDataPath, string.IsNullOrEmpty(persistentFileName) ? bountyFileName : persistentFileName);
+
         string jsonData = JsonUtility.ToJson(item);
-        if (File.Exists(BountyFilePath))
+        if (File.Exists(fullPath))
         {
-            string existingContent = File.ReadAllText(BountyFilePath).TrimEnd(']');
+            string existingContent = File.ReadAllText(fullPath).TrimEnd(']');
             existingContent += existingContent.Length > 2 ? "," : "";
-            File.WriteAllText(BountyFilePath, $"{existingContent}{jsonData}]");
+            File.WriteAllText(fullPath, $"{existingContent}{jsonData}]");
         }
         else
         {
-            File.WriteAllText(BountyFilePath, $"[{jsonData}]");
+            File.WriteAllText(fullPath, $"[{jsonData}]");
         }
 #if UNITY_EDITOR
-        Debug.Log($"Bounty saved at: {BountyFilePath}");
+        Debug.Log($"Bounty saved at: {fullPath}");
 #endif
     }
 
@@ -135,18 +155,94 @@ public class BountyBoardManager : MonoBehaviour
     public List<BountyItem> LoadBountyDataFromJSON()
     {
         List<BountyItem> items = new List<BountyItem>();
-        if (!File.Exists(BountyFilePath))
+        string json = null;
+
+        try
         {
-            Debug.LogWarning($"No bounty data found @ {BountyFilePath}");
+            switch (dataSource)
+            {
+                case BountyDataSource.Resources:
+                    {
+                        if (string.IsNullOrEmpty(resourcesPath))
+                        {
+                            Debug.LogError("Resources path not set for Bounty data.");
+                            return items;
+                        }
+                        TextAsset ta = Resources.Load<TextAsset>(resourcesPath);
+                        if (ta == null)
+                        {
+                            Debug.LogError($"Bounty JSON not found in Resources at '{resourcesPath}'. Place 'BountyItems.json' under Assets/Resources/{resourcesPath}.json");
+                            return items;
+                        }
+                        json = ta.text;
+                        break;
+                    }
+                case BountyDataSource.StreamingAssets:
+                    {
+                        string fullPath = Path.Combine(Application.streamingAssetsPath, streamingAssetsRelativePath);
+                        if (fullPath.StartsWith("http"))
+                        {
+                            // Android/WebGL path — use UnityWebRequest synchronously via SendWebRequest + wait
+                            var req = UnityWebRequest.Get(fullPath);
+                            var op = req.SendWebRequest();
+                            while (!op.isDone) { }
+                            if (req.result != UnityWebRequest.Result.Success)
+                            {
+                                Debug.LogError($"Failed to read StreamingAssets JSON at '{fullPath}': {req.error}");
+                                return items;
+                            }
+                            json = req.downloadHandler.text;
+                        }
+                        else
+                        {
+                            if (!File.Exists(fullPath))
+                            {
+                                Debug.LogError($"Bounty JSON not found in StreamingAssets at '{fullPath}'.");
+                                return items;
+                            }
+                            json = File.ReadAllText(fullPath);
+                        }
+                        break;
+                    }
+                case BountyDataSource.PersistentData:
+                    {
+                        string fullPath = string.IsNullOrEmpty(BountyFilePath)
+                            ? Path.Combine(Application.persistentDataPath, string.IsNullOrEmpty(persistentFileName) ? bountyFileName : persistentFileName)
+                            : BountyFilePath;
+                        if (!File.Exists(fullPath))
+                        {
+                            Debug.LogWarning($"No bounty data found @ {fullPath}");
+                            return items;
+                        }
+                        json = File.ReadAllText(fullPath);
+                        break;
+                    }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error loading bounty JSON: {ex.Message}");
             return items;
         }
 
-        string json = File.ReadAllText(BountyFilePath);
-        // Handle JSON array deserialization
-        json = $"{json}"; // Wrap array in an object
-        // Debug.Log($"your Bounty Json : {json}");
-        BountyItemWrapper wrapper = JsonUtility.FromJson<BountyItemWrapper>(json);
-        return wrapper?.bountyItems ?? items;
+        if (string.IsNullOrWhiteSpace(json))
+            return items;
+
+        // Expect an array JSON (e.g., [ {..}, {..} ])
+        // If your file is an array, use a wrapper Scriptable format or decode as array
+        try
+        {
+            // If your existing code uses a wrapper, keep it. Otherwise try array parsing helper
+            // Using wrapper class as before:
+            json = $"{json}"; // keep as-is; your wrapper expects an array
+            BountyItemWrapper wrapper = JsonUtility.FromJson<BountyItemWrapper>(json);
+            return wrapper?.bountyItems ?? items;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse bounty JSON: {ex.Message}");
+            return items;
+        }
     }
 
     #endregion
@@ -225,6 +321,3 @@ public class BountyBoardManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }
-
-
-

@@ -1563,6 +1563,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03c038bf6e7ac4163a44d043bba805cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
+  attackBtn: {fileID: 1993869815}
+  userHPbar: {fileID: 34658740}
+  enemyHPbar: {fileID: 1733422807}
+  hpText_user: {fileID: 1831153153}
+  hpText_enemy: {fileID: 207556516}
+  combatLog: {fileID: 0}
+  playerGO: {fileID: 41711256}
+  enemyGO: {fileID: 1461528977}
+  attackImage: {fileID: 166988750}
   bountyItem_info:
     name: 
     image: {fileID: 0}
@@ -1571,8 +1581,6 @@ MonoBehaviour:
     rewardType: 0
     difficulty: 
     rewardList: []
-  attackBtn: {fileID: 1993869815}
-  surrenderBtn: {fileID: 585883802}
   userInfo_temp_for_combat:
     userName: 
     userUid: 
@@ -1583,15 +1591,9 @@ MonoBehaviour:
     mean: 0
     sd: 0
     lastSpawnLocation: 0
-  userHPbar: {fileID: 0}
-  enemyHPbar: {fileID: 1733422807}
-  hpText_user: {fileID: 0}
-  hpText_enemy: {fileID: 207556516}
-  combatLog: {fileID: 0}
-  isExecuted: 0
-  playerGO: {fileID: 41711256}
-  enemyGO: {fileID: 1461528977}
-  attackImage: {fileID: 166988750}
+  combatReportEvent:
+    category: Combat
+    key: battle_report
 --- !u!4 &947237663
 Transform:
   m_ObjectHideFlags: 0

@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using System;
 
 public class GameLogger : MonoBehaviour
 {
@@ -333,5 +334,238 @@ public class GameLogger : MonoBehaviour
     public void LogEvent(EventRef ev)
     {
         LogEvent(ev.category, ev.key);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Battle reporting helpers
+    // Insert a log row and return its created id, then bulk insert turns
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Inserts one row into game_events with a structured payload and returns the created id via onSuccess.
+    /// The payload you pass becomes the JSON value under event_data.
+    /// </summary>
+    public void LogEventReturnId(
+        EventRef ev,
+        Dictionary<string, object> eventData,
+        Action<string> onSuccess,
+        Action<string> onError = null)
+    {
+        StartCoroutine(SendLogReturnId(ev, eventData, onSuccess, onError));
+    }
+
+    private IEnumerator SendLogReturnId(
+        EventRef ev,
+        Dictionary<string, object> eventData,
+        Action<string> onSuccess,
+        Action<string> onError)
+    {
+        if (authScript == null)
+        {
+            authScript = FindObjectOfType<SupabaseAuth>();
+            if (authScript == null)
+            {
+                onError?.Invoke("SupabaseAuth missing.");
+                yield break;
+            }
+        }
+        if (string.IsNullOrEmpty(authScript.SessionId) || string.IsNullOrEmpty(authScript.AccessToken))
+        {
+            onError?.Invoke("No session or access token.");
+            yield break;
+        }
+
+        string timestamp = System.DateTime.UtcNow.ToString("o");
+
+        var payloadDict = new Dictionary<string, object>
+        {
+            { "session_id", authScript.SessionId },
+            { "timestamp", timestamp },
+            { "event_data", eventData ?? new Dictionary<string, object>() }
+        };
+
+        string jsonBody = SerializeToJson(payloadDict);
+        byte[] body = Encoding.UTF8.GetBytes(jsonBody);
+        string url = $"{supabaseUrl}/rest/v1/{logTable}";
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        request.uploadHandler = new UploadHandlerRaw(body);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("apikey", anonKey);
+        request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
+        request.SetRequestHeader("Prefer", "return=representation");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string txt = request.downloadHandler.text?.Trim();
+            string id = ParseFirstIdFromArray(txt);
+            if (!string.IsNullOrEmpty(id))
+            {
+                onSuccess?.Invoke(id);
+            }
+            else
+            {
+                onError?.Invoke($"Insert ok but could not parse id. Response: {txt}");
+            }
+        }
+        else
+        {
+            onError?.Invoke(request.downloadHandler.text);
+        }
+    }
+
+    /// <summary>
+    /// Bulk inserts battle turns into the battle_turns table. Each row must contain the expected columns.
+    /// rows: a list of dictionaries (string->object) with keys matching your table columns.
+    /// </summary>
+    public void LogBattleTurnsBulk(
+        string gameEventId,
+        List<Dictionary<string, object>> rows,
+        Action onSuccess = null,
+        Action<string> onError = null)
+    {
+        StartCoroutine(SendBattleTurnsBulk(gameEventId, rows, onSuccess, onError));
+    }
+
+    private IEnumerator SendBattleTurnsBulk(
+        string gameEventId,
+        List<Dictionary<string, object>> rows,
+        Action onSuccess,
+        Action<string> onError)
+    {
+        if (authScript == null)
+        {
+            authScript = FindObjectOfType<SupabaseAuth>();
+            if (authScript == null)
+            {
+                onError?.Invoke("SupabaseAuth missing.");
+                yield break;
+            }
+        }
+        if (string.IsNullOrEmpty(authScript.AccessToken))
+        {
+            onError?.Invoke("No access token.");
+            yield break;
+        }
+        if (string.IsNullOrEmpty(gameEventId))
+        {
+            onError?.Invoke("gameEventId is required.");
+            yield break;
+        }
+        if (rows == null || rows.Count == 0)
+        {
+            onError?.Invoke("No rows to insert.");
+            yield break;
+        }
+
+        // Ensure each row has the FK set
+        for (int i = 0; i < rows.Count; i++)
+        {
+            if (!rows[i].ContainsKey("game_event_id"))
+                rows[i]["game_event_id"] = gameEventId;
+        }
+
+        string jsonArray = SerializeArray(rows);
+        byte[] body = Encoding.UTF8.GetBytes(jsonArray);
+
+        string url = $"{supabaseUrl}/rest/v1/battle_turns";
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        request.uploadHandler = new UploadHandlerRaw(body);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("apikey", anonKey);
+        request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
+        request.SetRequestHeader("Prefer", "return=minimal");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            onSuccess?.Invoke();
+        }
+        else
+        {
+            onError?.Invoke(request.downloadHandler.text);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Minimal JSON helpers (for dictionaries/arrays with primitives/strings)
+    // ─────────────────────────────────────────────────────────────────────────────
+    private static string SerializeToJson(object obj)
+    {
+        if (obj == null) return "null";
+
+        if (obj is string s) return Quote(Escape(s));
+        if (obj is bool b) return b ? "true" : "false";
+        if (obj is int || obj is long || obj is float || obj is double || obj is decimal)
+            return Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture);
+
+        if (obj is Dictionary<string, object> dict)
+        {
+            var sb = new StringBuilder();
+            sb.Append('{');
+            bool first = true;
+            foreach (var kv in dict)
+            {
+                if (!first) sb.Append(','); first = false;
+                sb.Append(Quote(Escape(kv.Key))).Append(':').Append(SerializeToJson(kv.Value));
+            }
+            sb.Append('}');
+            return sb.ToString();
+        }
+        if (obj is IList list)
+        {
+            var sb = new StringBuilder();
+            sb.Append('[');
+            bool first = true;
+            foreach (var item in list)
+            {
+                if (!first) sb.Append(','); first = false;
+                sb.Append(SerializeToJson(item));
+            }
+            sb.Append(']');
+            return sb.ToString();
+        }
+
+        // Fallback: try Unity's JsonUtility for POCOs
+        try { return JsonUtility.ToJson(obj); } catch { }
+        // Last resort: string-ify
+        return Quote(Escape(obj.ToString()));
+    }
+
+    private static string SerializeArray(List<Dictionary<string, object>> rows)
+    {
+        var sb = new StringBuilder();
+        sb.Append('[');
+        for (int i = 0; i < rows.Count; i++)
+        {
+            if (i > 0) sb.Append(',');
+            sb.Append(SerializeToJson(rows[i]));
+        }
+        sb.Append(']');
+        return sb.ToString();
+    }
+
+    private static string Quote(string s) => "\"" + s + "\"";
+    private static string Escape(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return s ?? string.Empty;
+        return s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t");
+    }
+
+    [Serializable] private class IdRow { public string id; }
+    private static string ParseFirstIdFromArray(string json)
+    {
+        if (string.IsNullOrEmpty(json)) return null;
+        var s = json.Trim();
+        if (s.StartsWith("[")) s = s.Substring(1);
+        if (s.EndsWith("]")) s = s.Substring(0, s.Length - 1);
+        try {
+            var row = JsonUtility.FromJson<IdRow>(s);
+            return row != null ? row.id : null;
+        } catch { return null; }
     }
 }

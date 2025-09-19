@@ -1,24 +1,95 @@
 using System.Net.Mime;
 using System.Collections;
 using System.Collections.Generic;
+using Stopwatch = System.Diagnostics.Stopwatch;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using BountyItemData;
+using UnityEngine.SceneManagement;
 
 public class CombatManager : MonoBehaviour
 {
-    public BountyItem bountyItem_info;
-    public Button attackBtn;
-    public UserInfo userInfo_temp_for_combat;
-    public Slider userHPbar, enemyHPbar;
-    public TextMeshProUGUI hpText_user, hpText_enemy;
-    public TextMeshProUGUI combatLog;
-    [SerializeField] private bool isExecuted = false;
-    public GameObject playerGO, enemyGO;
-    public GameObject attackImage;
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Catalog reference for EventRef dropdowns
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Header("Catalog Reference")]
+    [Tooltip("Catalog that supplies the Category→Event options for the dropdown below")] 
+    [SerializeField] private EventPayloadCatalog catalog;
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    // UI References
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Header("UI")]
+    [SerializeField] private Button attackBtn;
+    [SerializeField] private Slider userHPbar;
+    [SerializeField] private Slider enemyHPbar;
+    [SerializeField] private TextMeshProUGUI hpText_user;
+    [SerializeField] private TextMeshProUGUI hpText_enemy;
+    [SerializeField] private TextMeshProUGUI combatLog;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Scene Objects
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Header("Scene Objects")]
+    [SerializeField] private GameObject playerGO;
+    [SerializeField] private GameObject enemyGO;
+    [SerializeField] private GameObject attackImage;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Runtime Data
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Header("Runtime Data")]
+    [HideInInspector] public BountyItem bountyItem_info; // set via SetBountyItem or BountyBoardManager
+    [HideInInspector] public UserInfo userInfo_temp_for_combat;
+    private bool isExecuted = false;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Logging (battle report)
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Header("Logging (Battle Report)")]
+    [SerializeField] private EventRef combatReportEvent; // Catalog: Combat/combat_report (for example)
+
+    [System.Serializable]
+    public class BattleReportSummary
+    {
+        public string playerName;
+        public string enemyName;
+        public string startTimeUtc;
+        public string endTimeUtc;
+        public float durationSeconds;
+        public float avgClickInterval;
+        public string outcome; // "win" | "lose"
+        public float playerMean;
+        public float playerSd;
+        public float enemyMean;
+        public float enemySd;
+    }
+
+    [System.Serializable]
+    public class BattleTurnRow
+    {
+        public int turnIndex;
+        public string actor;          // "player" | "enemy"
+        public string action;         // "attack" | "defend"
+        public float damageDealt;
+        public float playerHpAfter;
+        public float enemyHpAfter;
+        public int   tClickIntervalMs; // interval between player button presses; 0 for enemy rows
+        public int   tElapsedMs;       // since battle start
+    }
+
+    private BattleReportSummary _summary;
+    private readonly List<BattleTurnRow> _turns = new List<BattleTurnRow>();
+    private Stopwatch _sw;
+    private int _lastPlayerClickMs = 0;
+    private int _turnIdx = 0;
+
+    private bool _battleEnded = false;
+
+    [Header("Flow / Navigation")]
+    [SerializeField] private string nextSceneName = "TheLab"; // scene to load after battle ends
 
     public CombatManager SetBountyItem(BountyItem bountyItem)
     {
@@ -41,8 +112,13 @@ public class CombatManager : MonoBehaviour
     void Start()
     {
         attackBtn.onClick.RemoveAllListeners();
-        attackBtn.onClick.AddListener(() => 
+        attackBtn.onClick.AddListener(() =>
         {
+            // record player click time for intervals
+            if (_sw != null && _sw.IsRunning)
+            {
+                // interval measured when we create the turn entry in Attack_Coroutine
+            }
             Attack();
         });
 
@@ -83,6 +159,46 @@ public class CombatManager : MonoBehaviour
         enemyHPbar.value = bountyItem_info.mean;
         hpText_user.text = "HP: " + userInfo_temp_for_combat.mean.ToString();
         hpText_enemy.text = "HP: " + bountyItem_info.mean.ToString();
+
+        // Initialize battle report
+        _summary = new BattleReportSummary
+        {
+            playerName = "Player1", // replace with profile if available
+            enemyName = "Enemy",
+            startTimeUtc = System.DateTime.UtcNow.ToString("o"),
+            playerMean = userInfo_temp_for_combat.mean,
+            playerSd = userInfo_temp_for_combat.sd,
+            enemyMean = bountyItem_info.mean,
+            enemySd = bountyItem_info.sd
+        };
+        _turns.Clear();
+        _turnIdx = 0;
+        _lastPlayerClickMs = 0;
+        _sw = new Stopwatch();
+        _sw.Start();
+    }
+
+    private void RecordTurn(string actor, string action, float damage)
+    {
+        int now = _sw != null ? (int)_sw.ElapsedMilliseconds : 0;
+        int interval = 0;
+        if (actor == "player")
+        {
+            interval = (_turnIdx == 0) ? 0 : (now - _lastPlayerClickMs);
+            _lastPlayerClickMs = now;
+        }
+        _turnIdx++;
+        _turns.Add(new BattleTurnRow
+        {
+            turnIndex = _turnIdx,
+            actor = actor,
+            action = action,
+            damageDealt = damage,
+            playerHpAfter = userHPbar != null ? userHPbar.value : 0f,
+            enemyHpAfter = enemyHPbar != null ? enemyHPbar.value : 0f,
+            tClickIntervalMs = actor == "player" ? interval : 0,
+            tElapsedMs = now
+        });
     }
 
     IEnumerator AttackedByTheEnemy(){
@@ -94,11 +210,24 @@ public class CombatManager : MonoBehaviour
             //this means the user lose
             Debug.Log("User Lose");
             combatLog.text = "User Lose";
-            // TODO: Implement an "end game" method for when a familiar is defeated. 
+            // TODO: Implement an "end game" method for when a familiar is defeated.
+            FinishAndSend("lose");
         }
         animateAttack(false, 0.2f);
         yield return new WaitForSeconds(0.2f);
         changeHPbar(true, calulatedDefenceDamage);
+        // record enemy attack turn (after HP updates)
+        RecordTurn("enemy", "attack", calulatedDefenceDamage);
+
+        // if player died as a result of this hit, finish now
+        if (userHPbar != null && userHPbar.value <= 0f && !_battleEnded)
+        {
+            Debug.Log("Player HP reached 0 after enemy attack. Finishing battle as LOSE.");
+            FinishAndSend("lose");
+            isExecuted = false;
+            yield break;
+        }
+
         isExecuted = false;
     }
     
@@ -106,6 +235,7 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("Attack Button Clicked"); 
         if (isExecuted){
+            Debug.Log("There is death.");
             return;
         }
         isExecuted = true;
@@ -120,8 +250,11 @@ public class CombatManager : MonoBehaviour
             animateAttack(true, 0.2f);
             yield return new WaitForSeconds(0.2f);
             changeHPbar(false, calulatedAttackDamage);
+            // record player attack turn (after HP updates)
+            RecordTurn("player", "attack", calulatedAttackDamage);
             Debug.Log("User Win");
-            combatLog.text = "User Win";
+            // combatLog.text = "User Win";
+            FinishAndSend("win");
             isExecuted = false;
             yield break;
         }else{
@@ -129,12 +262,22 @@ public class CombatManager : MonoBehaviour
             animateAttack(true, 0.2f);
             yield return new WaitForSeconds(0.2f);
             changeHPbar(false, calulatedAttackDamage);
-            //animate and change HP bar
+            // record player attack turn (after HP updates)
+            RecordTurn("player", "attack", calulatedAttackDamage);
+
+            // if enemy died as a result of this hit, finish now
+            if (enemyHPbar != null && enemyHPbar.value <= 0f && !_battleEnded)
+            {
+                Debug.Log("Enemy HP reached 0 after player attack. Finishing battle as WIN.");
+                FinishAndSend("win");
+                isExecuted = false;
+                yield break;
+            }
+
             Debug.Log("Normal Attack");
-            combatLog.text = "Normal Attack";
             //now being attacked by the enemy
             yield return AttackedByTheEnemy();
-        } 
+        }
     }
 
     public void animateAttack(bool isFromUser, float time){
@@ -196,5 +339,127 @@ public class CombatManager : MonoBehaviour
     public float getDefenceDamage(UserInfo userInfo, BountyItem bountyItem)
     {
         return Random.Range(bountyItem.mean - bountyItem.sd, bountyItem.mean + bountyItem.sd)/10;
+    }
+
+    private void FinishAndSend(string outcome)
+    {
+        if (_battleEnded) return; // prevent double send
+        _battleEnded = true;
+
+        if (attackBtn != null) attackBtn.interactable = false;
+
+        if (_sw != null && _sw.IsRunning) _sw.Stop();
+        if (_summary == null) _summary = new BattleReportSummary();
+
+        _summary.outcome = outcome;
+        _summary.endTimeUtc = System.DateTime.UtcNow.ToString("o");
+        _summary.durationSeconds = _sw != null ? (float)(_sw.ElapsedMilliseconds / 1000.0) : 0f;
+
+        // average interval across player clicks only
+        int playerTurns = 0;
+        int sumIntervals = 0;
+        for (int i = 0; i < _turns.Count; i++)
+        {
+            if (_turns[i].actor == "player")
+            {
+                playerTurns++;
+                if (_turns[i].tClickIntervalMs > 0)
+                    sumIntervals += _turns[i].tClickIntervalMs;
+            }
+        }
+        _summary.avgClickInterval = (playerTurns > 1) ? (sumIntervals / (float)(playerTurns - 1) / 1000f) : 0f;
+
+        // Build payload for game_events.event_data
+        var payload = new Dictionary<string, object>
+        {
+            { "battle_report", _summary }
+        };
+
+        var logger = GameLogger.Instance != null ? GameLogger.Instance : GameObject.FindObjectOfType<GameLogger>();
+        if (logger == null)
+        {
+            Debug.LogWarning("GameLogger not present; battle report not sent. Loading next scene anyway.");
+            SafeLoadNextScene();
+            return;
+        }
+
+        // Convert turns to list of row dictionaries for /battle_turns bulk insert
+        var rows = new List<Dictionary<string, object>>(_turns.Count);
+        foreach (var t in _turns)
+        {
+            rows.Add(new Dictionary<string, object>
+            {
+                { "turn_index", t.turnIndex },
+                { "actor", t.actor },
+                { "action", t.action },
+                { "damage_dealt", t.damageDealt },
+                { "player_hp_after", t.playerHpAfter },
+                { "enemy_hp_after", t.enemyHpAfter },
+                { "t_click_interval_ms", t.tClickIntervalMs },
+                { "t_elapsed_ms", t.tElapsedMs }
+            });
+        }
+
+        logger.LogEventReturnId(
+            combatReportEvent,
+            payload,
+            onSuccess: (eventId) =>
+            {
+                logger.LogBattleTurnsBulk(eventId, rows,
+                    onSuccess: () => {
+                        Debug.Log($"Battle report sent with {rows.Count} turns. Id=" + eventId);
+                        SafeLoadNextScene();
+                    },
+                    onError: (err) => {
+                        Debug.LogError("Battle turns insert failed: " + err);
+                        SafeLoadNextScene();
+                    });
+            },
+            onError: (err) => {
+                Debug.LogError("Battle summary insert failed: " + err);
+                SafeLoadNextScene();
+            }
+        );
+    }
+
+    private void SafeLoadNextScene()
+    {
+        if (string.IsNullOrEmpty(nextSceneName))
+        {
+            Debug.LogWarning("nextSceneName not set on CombatManager. Staying in current scene.");
+            return;
+        }
+        try
+        {
+            SceneManager.LoadSceneAsync(nextSceneName, LoadSceneMode.Single);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Failed to load scene '" + nextSceneName + "': " + ex.Message);
+        }
+    }
+
+    private void OnValidate()
+    {
+        // Auto-assign the catalog in the editor when possible so the EventRef drawer shows dropdowns
+        #if UNITY_EDITOR
+        if (catalog == null)
+        {
+            var gl = FindObjectOfType<GameLogger>();
+            if (gl != null && gl.catalog != null)
+            {
+                catalog = gl.catalog;
+            }
+            else
+            {
+                // Fallback to Resources lookup (Assets/Resources/EventPayloadCatalog.asset)
+                var fallback = Resources.Load<EventPayloadCatalog>("EventPayloadCatalog");
+                if (fallback != null)
+                {
+                    catalog = fallback;
+                }
+            }
+        }
+        #endif
     }
 }
