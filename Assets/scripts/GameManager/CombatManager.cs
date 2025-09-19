@@ -10,7 +10,7 @@ using BountyItemData;
 public class CombatManager : MonoBehaviour
 {
     public BountyItem bountyItem_info;
-    public Button attackBtn, surrenderBtn;
+    public Button attackBtn;
     public UserInfo userInfo_temp_for_combat;
     public Slider userHPbar, enemyHPbar;
     public TextMeshProUGUI hpText_user, hpText_enemy;
@@ -29,12 +29,12 @@ public class CombatManager : MonoBehaviour
     private void Awake()
     {
 
-        //GameObject go = GameObject.Find("CombatManager_Temp");
-        //if (go != null)
-        //{
-        //    bountyItem_info = go.GetComponent<CombatManager>().bountyItem_info.deepCopy();
-        //    Destroy(go);
-        //}
+        GameObject go = GameObject.Find("CombatManager_Temp");
+        if (go != null)
+        {
+           bountyItem_info = go.GetComponent<CombatManager>().bountyItem_info.deepCopy();
+           Destroy(go);
+        }
 
     }
 
@@ -45,14 +45,8 @@ public class CombatManager : MonoBehaviour
         {
             Attack();
         });
-        attackBtn.interactable = true;
 
-        surrenderBtn.onClick.RemoveAllListeners();
-        surrenderBtn.onClick.AddListener(() => 
-        {
-            Surrender();
-        });
-        surrenderBtn.interactable = true;
+        attackBtn.interactable = true;
 
         StartCombat();
     }
@@ -91,21 +85,16 @@ public class CombatManager : MonoBehaviour
         hpText_enemy.text = "HP: " + bountyItem_info.mean.ToString();
     }
 
-
-    public void Surrender()
-    {
-        Debug.Log("Surrender");
-        combatLog.text = "Surrender";
-    }
-
     IEnumerator AttackedByTheEnemy(){
         yield return new WaitForSeconds(0.2f);
         Debug.Log("Attacked by the enemy");
         float calulatedDefenceDamage = getAttackedDamage(userInfo_temp_for_combat, bountyItem_info);
-        if (calulatedDefenceDamage >= userInfo_temp_for_combat.mean){
+        if (calulatedDefenceDamage >= userInfo_temp_for_combat.mean)
+        {
             //this means the user lose
             Debug.Log("User Lose");
             combatLog.text = "User Lose";
+            // TODO: Implement an "end game" method for when a familiar is defeated. 
         }
         animateAttack(false, 0.2f);
         yield return new WaitForSeconds(0.2f);
