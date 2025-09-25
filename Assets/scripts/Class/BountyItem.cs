@@ -32,7 +32,9 @@ namespace BountyItemData
     public class BountyItem
     {
         public string name;
+        [NonSerialized]
         public Sprite image;
+        public string imagePath;
         public float mean;
         public float sd;
         public RewardType rewardType;
@@ -40,10 +42,10 @@ namespace BountyItemData
         //public Dictionary<RewardType, int> rewardList;
         public List<RewardEntry> rewardList; // Use List<RewardEntry> instead of Dictionary
 
-        public BountyItem(string name, Sprite image, float mean, float sd, string difficulty,List<RewardEntry> rewardList)
+        public BountyItem(string name, string imagePath, float mean, float sd, string difficulty,List<RewardEntry> rewardList)
         {
             this.name = name;
-            this.image = image;
+            this.imagePath = imagePath;
             this.rewardList = rewardList;
             this.difficulty = difficulty;
             this.mean = mean;
@@ -52,7 +54,9 @@ namespace BountyItemData
 
         public BountyItem deepCopy()
         {
-            return new BountyItem(name, image, mean, sd, difficulty.ToString(), rewardList);
+            var copy = new BountyItem(name, imagePath, mean, sd, difficulty.ToString(), rewardList);
+            copy.image = image;
+            return copy;
         }
     }
 

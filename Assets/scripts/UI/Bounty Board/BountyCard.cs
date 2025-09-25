@@ -59,10 +59,34 @@ public class BountyCard : MonoBehaviour
 
     private void InitializeCard()
     {
-        cardImage.sprite = bountyItem.image;
-        cardName.text = bountyItem.name;
-        cardMean.text = "Mean: " + bountyItem.mean.ToString();
-        cardSD.text = "SD: " + bountyItem.sd.ToString();
+        // Resolve sprite: prefer runtime sprite on the item; otherwise try Resources by path
+        Sprite spriteToUse = bountyItem != null ? bountyItem.image : null;
+        if (spriteToUse == null && bountyItem != null && !string.IsNullOrEmpty(bountyItem.imagePath))
+        {
+            // Expect path like "Sprites/Dragon" under Assets/Resources/
+            spriteToUse = Resources.Load<Sprite>(bountyItem.imagePath);
+            if (spriteToUse == null)
+            {
+                // If this is a sliced sprite sheet, try LoadAll and take the first sub-sprite
+                var all = Resources.LoadAll<Sprite>(bountyItem.imagePath);
+                if (all != null && all.Length > 0)
+                    spriteToUse = all[0];
+            }
+#if UNITY_EDITOR
+            if (spriteToUse == null)
+                Debug.LogWarning($"BountyCard: Sprite not found at Resources path '{bountyItem.imagePath}'.");
+#endif
+            // Cache for later scene restore paths that read bountyItem.image
+            if (spriteToUse != null && bountyItem != null)
+                bountyItem.image = spriteToUse;
+        }
+
+        if (cardImage != null)
+            cardImage.sprite = spriteToUse;
+
+        if (cardName != null) cardName.text = bountyItem.name;
+        if (cardMean != null) cardMean.text = "Mean: " + bountyItem.mean.ToString();
+        if (cardSD   != null) cardSD.text   = "SD: "   + bountyItem.sd.ToString();
 
         //Small check to display card status
         cardSelectedStatus.enabled = false;

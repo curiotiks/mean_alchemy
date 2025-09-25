@@ -5,12 +5,21 @@ using UnityEngine;
 using System.IO;
 using System;
 using UnityEngine.SceneManagement;
-using TrollBridge;
-using UnityEngine.Assertions.Must;
 using UnityEngine.Networking;
 
 public class BountyBoardManager : MonoBehaviour
 {
+    /// <summary>
+    /// Central controller for the Bounty Board scene. Responsible for:
+    ///  - Loading bounty data (Resources / StreamingAssets / PersistentData)
+    ///  - Spawning bounty card prefabs into difficulty lanes
+    ///  - Restoring currently selected bounty into non-board scenes
+    ///  - Handling scene transitions and re-initialization
+    /// </summary>
+
+    private const string TAG_CARD_HOLDER_PARENT = "cardholderparent";
+    private const string TAG_SELECTED_CARD_HOLDER = "selectedcardholder";
+
     public static BountyBoardManager instance;
 
     public enum BountyDataSource { Resources, StreamingAssets, PersistentData }
@@ -50,7 +59,8 @@ public class BountyBoardManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (shouldDestroyOnLoad == false)
+                DontDestroyOnLoad(gameObject);
             InitializeCards();
         }
         else
@@ -64,12 +74,13 @@ public class BountyBoardManager : MonoBehaviour
     {
         // Initialize the cards holder panels
         SceneManager.sceneLoaded += OnSceneLoaded;
-        CardHolderParent = GameObject.FindGameObjectWithTag("cardholderparent");
+        CardHolderParent = GameObject.FindGameObjectWithTag(TAG_CARD_HOLDER_PARENT);
         cardsHolderPanels = CardHolderParent.GetComponentsInChildren<CardsHolderPanel>().ToList();
         foreach (CardsHolderPanel panel in cardsHolderPanels)
         {
             panel.ClearTheCards();
         }
+        // Required: assign the card prefab in Inspector
         if (CardsPrefab == null)
         {
             Debug.LogError("CardsPrefab is not assigned in the inspector.");
@@ -78,6 +89,10 @@ public class BountyBoardManager : MonoBehaviour
         //InitializeCards();
     }
 
+    /// <summary>
+    /// Builds the board by reading bounty data and instantiating card prefabs into each difficulty panel.
+    /// Panels are discovered via the tag defined in TAG_CARD_HOLDER_PARENT.
+    /// </summary>
     public void InitializeCards()
     {
         List<BountyItem> bountyItemsFromJSON = LoadBountyDataFromJSON();
@@ -88,7 +103,7 @@ public class BountyBoardManager : MonoBehaviour
             return;
         }
 
-        CardHolderParent = GameObject.FindGameObjectWithTag("cardholderparent");
+        CardHolderParent = GameObject.FindGameObjectWithTag(TAG_CARD_HOLDER_PARENT);
         if (CardHolderParent)
         {
             cardsHolderPanels = CardHolderParent.GetComponentsInChildren<CardsHolderPanel>().ToList();
@@ -97,27 +112,19 @@ public class BountyBoardManager : MonoBehaviour
         {
             foreach (CardsHolderPanel panel in cardsHolderPanels)
             {
-                int cardCOunt = 0;
+                int cardCount = 0;
                 foreach (BountyItem bounty in bountyItemsFromJSON)
                 {
-                    // Debug.Log($"Trying to add '{bounty.difficulty}' to panel '{panel.name}' with difficulty '{panel.cardDifficulty}'");
                     // For each panel, check if the bounty item difficulty matches the panel's difficulty
-                    if (bounty.difficulty.Equals(panel.cardDifficulty.ToString(), StringComparison.OrdinalIgnoreCase) && (cardCOunt < panel.MaxCards))
+                    if (bounty.difficulty.Equals(panel.cardDifficulty.ToString(), StringComparison.OrdinalIgnoreCase) && (cardCount < panel.MaxCards))
                     {
-                        // Debug.Log($"Adding '{bounty.difficulty}' to panel '{panel.name}'");
-                        // Debug.Log($"Trying to add card '{bounty.name}' to panel '{panel.name}' (Child count before: {panel.transform.childCount})");
                         GameObject tempCard = Instantiate(CardsPrefab, panel.transform);
-                        // Debug.Log($"Card '{tempCard.name}' added. New child count: {panel.transform.childCount}");
                         tempCard.GetComponent<BountyCard>().setCardInfo(bounty);
                         panel.AddCardsToThisRow(new List<GameObject> { tempCard });
-                        cardCOunt++;
-                    }
-                    else
-                    {
-                        // Debug.Log($"Skipping '{bounty.difficulty}' for panel '{panel.name}' due to difficulty mismatch or max cards reached.");
+                        cardCount++;
                     }
                 }
-                cardCOunt = 0;
+                cardCount = 0;
             }
 
         }
@@ -130,6 +137,10 @@ public class BountyBoardManager : MonoBehaviour
 
     #region JSON operations
 
+    /// <summary>
+    /// Appends a single <see cref="BountyItem"/> to a JSON array under Application.persistentDataPath.
+    /// This does not modify project assets; intended for legacy/local persistence only.
+    /// </summary>
     public void SaveBountyItemToJson(BountyItem item)
     {
         // Only persist to PersistentData to avoid modifying project assets at runtime
@@ -152,6 +163,12 @@ public class BountyBoardManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Loads bounty data according to the selected <see cref="BountyDataSource"/>.
+    /// Resources → Assets/Resources/{resourcesPath}.json
+    /// StreamingAssets → Assets/StreamingAssets/{streamingAssetsRelativePath}
+    /// PersistentData → Application.persistentDataPath/{persistentFileName}
+    /// </summary>
     public List<BountyItem> LoadBountyDataFromJSON()
     {
         List<BountyItem> items = new List<BountyItem>();
@@ -248,6 +265,10 @@ public class BountyBoardManager : MonoBehaviour
     #endregion
 
 
+    /// <summary>
+    /// Synchronously loads a scene by name. Clears cached panel references; the Start/sceneLoaded flow
+    /// will repopulate them and rebuild cards.
+    /// </summary>
     public void HardLoadScene(string sceneName)
     {
         if (string.IsNullOrEmpty(sceneName))
@@ -261,30 +282,52 @@ public class BountyBoardManager : MonoBehaviour
             cardsHolderPanels = null;
         }
         SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
-        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    /// <summary>
+    /// SceneLoaded callback: rebinds panel references, restores the selected bounty into non-board scenes,
+    /// then (re)initializes the board and unsubscribes itself.
+    /// </summary>
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // Debug.LogWarning("Scene : " + SceneManager.GetActiveScene().name);
-        CardHolderParent = GameObject.FindGameObjectWithTag("cardholderparent");
-        selectedCardPanel = GameObject.FindGameObjectWithTag("selectedcardholder");
-        if (selectedCardPanel != null && currentBounty!=null && SceneManager.GetActiveScene().name!= "BountyBoard")
+        CardHolderParent = GameObject.FindGameObjectWithTag(TAG_CARD_HOLDER_PARENT);
+        selectedCardPanel = GameObject.FindGameObjectWithTag(TAG_SELECTED_CARD_HOLDER);
+
+        if (selectedCardPanel != null && currentBounty != null && SceneManager.GetActiveScene().name != "BountyBoard")
         {
-            GameObject _gameObject = Instantiate(CardsPrefab.gameObject, selectedCardPanel.transform);
-            _gameObject.transform.localScale = Vector3.one * .6f;
-            //_gameObject.GetComponent<BountyCard>().setCardInfo(currentBounty.getCardInfo());
-            //_gameObject.transform.SetParent(selectedCardPanel.transform);
+            GameObject instantiatedCard = Instantiate(CardsPrefab.gameObject, selectedCardPanel.transform);
+            instantiatedCard.transform.localScale = Vector3.one * .6f;
 
-            _gameObject.GetComponent<BountyCard>().bountyItem = new BountyItem(currentBounty.bountyItem.name,currentBounty.bountyItem.image
-                ,currentBounty.bountyItem.mean,currentBounty.bountyItem.sd,
-                currentBounty.bountyItem.difficulty,currentBounty.bountyItem.rewardList);
-            BountyCard bcard = _gameObject.GetComponent<BountyCard>();
+            var src = currentBounty.bountyItem;
+            instantiatedCard.GetComponent<BountyCard>().bountyItem = new BountyItem(
+                src.name,
+                src.imagePath,   // constructor now expects imagePath (string)
+                src.mean,
+                src.sd,
+                src.difficulty,
+                src.rewardList
+            );
 
-            bcard.cardImage.sprite = currentBounty.bountyItem.image;
-            bcard.cardName.text = currentBounty.bountyItem.name;
-            bcard.cardMean.text = "Mean: " + currentBounty.bountyItem.mean.ToString();
-            bcard.cardSD.text = "SD: " + currentBounty.bountyItem.sd.ToString();
+            BountyCard bcard = instantiatedCard.GetComponent<BountyCard>();
+
+            // Resolve sprite from cached image or Resources path
+            Sprite resolved = src.image;
+            if (resolved == null && !string.IsNullOrEmpty(src.imagePath))
+            {
+                resolved = Resources.Load<Sprite>(src.imagePath);
+                if (resolved == null)
+                {
+                    var all = Resources.LoadAll<Sprite>(src.imagePath);
+                    if (all != null && all.Length > 0) resolved = all[0];
+                }
+            }
+            if (bcard.cardImage != null) bcard.cardImage.sprite = resolved;
+            if (bcard.cardName  != null) bcard.cardName.text  = src.name;
+            if (bcard.cardMean  != null) bcard.cardMean.text  = "Mean: " + src.mean.ToString();
+            if (bcard.cardSD    != null) bcard.cardSD.text    = "SD: "   + src.sd.ToString();
+            // cache into the new item too (helps later scene passes)
+            bcard.bountyItem.image = resolved;
 
             bcard.abandonButton.enabled = true;
             bcard.abandonButton.gameObject.SetActive(true);
@@ -297,6 +340,7 @@ public class BountyBoardManager : MonoBehaviour
             //_gameObject.GetComponent<BountyCard>().CustomMethodForBountyBoard();
             selectedCardPanel.SetActive(true);
         }
+
         if (CardHolderParent)
         {
             cardsHolderPanels = CardHolderParent.GetComponentsInChildren<CardsHolderPanel>().ToList();
@@ -305,12 +349,14 @@ public class BountyBoardManager : MonoBehaviour
             {
                 panel.ClearTheCards();
             }
+            // Required: assign the card prefab in Inspector
             if (CardsPrefab == null)
             {
                 Debug.LogError("CardsPrefab is not assigned in the inspector.");
                 return;
             }
         }
+
         else
         {
             Debug.LogWarning("CardHolderParent not found in the scene.");
@@ -318,6 +364,11 @@ public class BountyBoardManager : MonoBehaviour
 
         InitializeCards();
         //InitializeCards();
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }
