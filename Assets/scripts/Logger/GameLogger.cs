@@ -329,11 +329,53 @@ public class GameLogger : MonoBehaviour
     }
 
     /// <summary>
+    /// Log an event defined in the catalog by category/key with additional event_data payload.
+    /// The payload is wrapped as: { action, target, data }
+    /// </summary>
+    public void LogEvent(string category, string key, Dictionary<string, object> data)
+    {
+        if (!TryGetCatalogEntry(category, key, out var entry))
+        {
+            Debug.LogWarning($"GameLogger: No catalog entry for {category}/{key}. Check your EventPayloadCatalog.");
+            return;
+        }
+
+        var env = new Dictionary<string, object>
+        {
+            { "action", entry.action },
+            { "target", entry.target },
+            { "data",  data ?? new Dictionary<string, object>() }
+        };
+
+        string jsonPayload = SerializeToJson(env);
+        StartCoroutine(SendLog(jsonPayload));
+    }
+
+    /// <summary>
     /// Convenience overload to log using an EventRef (as used by UI connectors).
     /// </summary>
     public void LogEvent(EventRef ev)
     {
+        if (IsUnset(ev)) { Debug.LogWarning("GameLogger.LogEvent(EventRef): EventRef is unset"); return; }
         LogEvent(ev.category, ev.key);
+    }
+
+    /// <summary>
+    /// Convenience overload to log using an EventRef with additional payload.
+    /// </summary>
+    public void LogEvent(EventRef ev, Dictionary<string, object> data)
+    {
+        if (IsUnset(ev)) { Debug.LogWarning("GameLogger.LogEvent(EventRef, data): EventRef is unset"); return; }
+        LogEvent(ev.category, ev.key, data);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Helper for struct-safe EventRef null/unset checking
+    // ─────────────────────────────────────────────────────────────────────────────
+    private static bool IsUnset(EventRef ev)
+    {
+        // EventRef may be a struct; do not compare to null
+        return string.IsNullOrEmpty(ev.category) || string.IsNullOrEmpty(ev.key);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

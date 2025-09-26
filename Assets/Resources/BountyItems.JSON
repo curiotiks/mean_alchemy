@@ -2,7 +2,7 @@
   "bountyItems": [
     {
       "name": "Dragon Hunt",
-      "imagePath": "Sprites/Dragon",
+      "imagePath": "Sprites/familiar/Mon_014_c_front",
       "mean": 12.5,
       "sd": 3.2,
       "difficulty" : "Easy",
@@ -13,7 +13,7 @@
     },
     {
       "name": "Bandit Cleanup",
-      "imagePath": "Sprites/Bandit",
+      "imagePath": "Sprites/familiar/Mon_001_a_front",
       "mean": 8.0,
       "sd": 1.5,
       "difficulty" : "Easy",
@@ -23,8 +23,8 @@
       ]
     },
     {
-      "name": "Lost Relic",
-      "imagePath": "Sprites/Relic",
+      "name": "Lost Relic" ,
+      "imagePath": "Sprites/familiar/Mon_002_a_front",
       "mean": 15.0,
       "sd": 4.0,
       "difficulty" : "Easy",
@@ -36,7 +36,7 @@
     },
     {
       "name": "Goblin Raid",
-      "imagePath": "Sprites/Goblin",
+      "imagePath": "Sprites/familiar/Mon_003_b_front",
       "mean": 5.5,
       "sd": 1.0,
       "difficulty" : "Easy",
@@ -46,7 +46,7 @@
     },
     {
       "name": "Ancient Curse",
-      "imagePath": "Sprites/Curse",
+      "imagePath": "Sprites/familiar/Mon_005_a_front",
       "mean": 20.0,
       "sd": 5.0,
       "difficulty" : "Medium",
@@ -57,7 +57,7 @@
     },
     {
       "name": "Wolf Pack",
-      "imagePath": "Sprites/Wolf",
+      "imagePath": "Sprites/familiar/Mon_006_a_front",
       "mean": 7.0,
       "sd": 1.8,
       "difficulty" : "Medium",
@@ -68,7 +68,7 @@
     },
     {
       "name": "Haunted Ruins",
-      "imagePath": "Sprites/Ghost",
+      "imagePath": "Sprites/familiar/Mon_009_a_front",
       "mean": 18.0,
       "sd": 4.5,
       "difficulty" : "Medium",
@@ -78,7 +78,7 @@
     },
     {
       "name": "Treasure Hunt",
-      "imagePath": "Sprites/Treasure",
+      "imagePath": "Sprites/familiar/Mon_010_b_front",
       "mean": 10.0,
       "sd": 2.0,
       "difficulty" : "Hard",
@@ -88,7 +88,7 @@
     },
     {
       "name": "Mysterious Stranger",
-      "imagePath": "Sprites/Stranger",
+      "imagePath": "Sprites/familiar/Mon_011_b_front",
       "mean": 25.0,
       "sd": 6.0,
       "difficulty" : "Hard",
@@ -100,7 +100,7 @@
     },
     {
       "name": "Mysterious Stranger",
-      "imagePath": "Sprites/Stranger",
+      "imagePath": "Sprites/familiar/Mon_012_a_front",
       "mean": 25.0,
       "sd": 6.0,
       "difficulty" : "Hard",
@@ -112,7 +112,7 @@
     },
     {
       "name": "Dragon's Lair",
-      "imagePath": "Sprites/DragonLair",
+      "imagePath": "Sprites/familiar/Mon_013_a_front",
       "mean": 30.0,
       "sd": 7.0,
       "difficulty" : "Hard",

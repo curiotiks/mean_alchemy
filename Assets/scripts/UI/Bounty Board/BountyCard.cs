@@ -1,11 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using BountyItemData;
 using UnityEngine.UI;
 
 public class BountyCard : MonoBehaviour
 {
+    // Built-in logging (no inspector wiring required)
+    private const string LOG_CATEGORY = "Bounty Board";
+    private const string EV_VIEW     = "view_card";
+    private const string EV_CLOSE    = "close_card";
+    private const string EV_ACCEPT   = "select_bounty";
+    private const string EV_ABANDON  = "abandon_bounty";
+
     [Header("Fill UI ELEMEMTS HERE")]
     [SerializeField] public Image cardImage;
     [SerializeField] public TMPro.TextMeshProUGUI cardName;
@@ -174,6 +182,8 @@ public class BountyCard : MonoBehaviour
             acceptButton.gameObject.SetActive(isSelected);
             abandonButton.gameObject.SetActive(!isSelected);
         }
+        if (isSelected)
+            LogKey(EV_VIEW);
     }
 
     private void HandleCloseSelection()
@@ -184,6 +194,7 @@ public class BountyCard : MonoBehaviour
         closeButton.gameObject.SetActive(isSelected);
         acceptButton.gameObject.SetActive(isSelected);
         abandonButton.gameObject.SetActive(false);
+        LogKey(EV_CLOSE);
     }
 
     private void HandleCardAcceptance()
@@ -206,6 +217,7 @@ public class BountyCard : MonoBehaviour
         //{
         //    BountyBoardManager.instance.HardLoadScene("BountyBoard");
         //});
+        LogKey(EV_ACCEPT);
     }
 
     private void HandleAbandonSelection()
@@ -214,5 +226,36 @@ public class BountyCard : MonoBehaviour
         cardSelectedStatus.enabled = false;
         Destroy(BountyBoardManager.instance.currentBounty.gameObject);
         BountyBoardManager.instance.currentBounty = null;
+        LogKey(EV_ABANDON);
+    }
+
+    private Dictionary<string, object> BuildBountyPayload()
+    {
+        var payload = new Dictionary<string, object>();
+        if (bountyItem != null)
+        {
+            payload["bounty_name"] = bountyItem.name;
+            payload["bounty_mean"] = bountyItem.mean;
+            payload["bounty_sd"] = bountyItem.sd;
+            payload["bounty_difficulty"] = bountyItem.difficulty;
+            if (!string.IsNullOrEmpty(bountyItem.imagePath))
+                payload["image_path"] = bountyItem.imagePath;
+        }
+        payload["is_selected"] = isSelected;
+        return payload;
+    }
+
+    private void LogKey(string key, Dictionary<string, object> extra = null)
+    {
+        var logger = GameLogger.Instance != null ? GameLogger.Instance : GameObject.FindObjectOfType<GameLogger>();
+        if (logger == null) return; // silently skip if logger not present
+
+        var payload = BuildBountyPayload();
+        if (extra != null)
+        {
+            foreach (var kv in extra)
+                if (!payload.ContainsKey(kv.Key)) payload[kv.Key] = kv.Value;
+        }
+        logger.LogEvent(LOG_CATEGORY, key, payload);
     }
 }

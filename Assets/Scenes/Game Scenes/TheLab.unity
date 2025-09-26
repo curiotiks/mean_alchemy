@@ -2533,10 +2533,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6a1c738e2fc54b5aa9b5e2bb5556614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 0}
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
   eventRef:
-    category: 
-    key: 
+    category: Location
+    key: bounty_board
   logOnButtonClick: 0
   logOnCollision: 1
   playerTag: Player
