@@ -54,56 +54,62 @@ public class SupabaseAuth : MonoBehaviour
         string loginPayload = $"{{\"email\":\"{email}\",\"password\":\"{password}\"}}";
         byte[] loginBody = Encoding.UTF8.GetBytes(loginPayload);
 
-        UnityWebRequest loginRequest = new UnityWebRequest(loginUrl, "POST");
-        loginRequest.uploadHandler = new UploadHandlerRaw(loginBody);
-        loginRequest.downloadHandler = new DownloadHandlerBuffer();
-        loginRequest.SetRequestHeader("Content-Type", "application/json");
-        loginRequest.SetRequestHeader("apikey", anonKey);
-        
-
-        // ---- Send the request
-        yield return loginRequest.SendWebRequest();
-
-        if (loginRequest.result == UnityWebRequest.Result.Success)
+        using (var loginRequest = new UnityWebRequest(loginUrl, "POST"))
         {
-            Debug.Log("✅ Login successful.");
-            yield return CreateSession(loginRequest.downloadHandler.text, studyCode);
-        }
-        else
-        {
-            yield return CheckStudyCode(studyCode, (exists) =>
+            loginRequest.uploadHandler = new UploadHandlerRaw(loginBody);
+            loginRequest.downloadHandler = new DownloadHandlerBuffer();
+            loginRequest.disposeUploadHandlerOnDispose = true;
+            loginRequest.disposeDownloadHandlerOnDispose = true;
+            loginRequest.SetRequestHeader("Content-Type", "application/json");
+            loginRequest.SetRequestHeader("apikey", anonKey);
+
+            // ---- Send the request
+            yield return loginRequest.SendWebRequest();
+
+            if (loginRequest.result == UnityWebRequest.Result.Success)
             {
-                if (exists)
+                Debug.Log("✅ Login successful.");
+                yield return CreateSession(loginRequest.downloadHandler.text, studyCode);
+            }
+            else
+            {
+                yield return CheckStudyCode(studyCode, (exists) =>
                 {
-                    Debug.Log("🟢 Study code verified. Attempting signup...");
-                    StartCoroutine(SignUp(email, password, studyCode, classCode));
-                }
-                else
-                {
-                    Debug.LogError("❌ Invalid study code. Cannot sign up.");
-                }
-            });
+                    if (exists)
+                    {
+                        Debug.Log("🟢 Study code verified. Attempting signup...");
+                        StartCoroutine(SignUp(email, password, studyCode, classCode));
+                    }
+                    else
+                    {
+                        Debug.LogError("❌ Invalid study code. Cannot sign up.");
+                    }
+                });
+            }
         }
     }
 
     private IEnumerator CheckStudyCode(string studyCode, System.Action<bool> callback)
     {
         string checkUrl = $"{supabaseUrl}/rest/v1/study_codes?study_code=eq.{studyCode}";
-        UnityWebRequest checkRequest = UnityWebRequest.Get(checkUrl);
-        checkRequest.SetRequestHeader("apikey", anonKey);
-
-        yield return checkRequest.SendWebRequest();
-
-        if (checkRequest.result == UnityWebRequest.Result.Success)
+        using (var checkRequest = UnityWebRequest.Get(checkUrl))
         {
-            bool exists = checkRequest.downloadHandler.text.Length > 2;
-            Debug.Log(exists ? "✅ Study code exists." : "❌ Study code does not exist.");
-            callback(exists);
-        }
-        else
-        {
-            Debug.LogError("❌ Error checking study code: " + checkRequest.error);
-            callback(false);
+            checkRequest.disposeDownloadHandlerOnDispose = true;
+            checkRequest.SetRequestHeader("apikey", anonKey);
+
+            yield return checkRequest.SendWebRequest();
+
+            if (checkRequest.result == UnityWebRequest.Result.Success)
+            {
+                bool exists = checkRequest.downloadHandler.text.Length > 2;
+                Debug.Log(exists ? "✅ Study code exists." : "❌ Study code does not exist.");
+                callback(exists);
+            }
+            else
+            {
+                Debug.LogError("❌ Error checking study code: " + checkRequest.error);
+                callback(false);
+            }
         }
     }
 
@@ -114,54 +120,59 @@ public class SupabaseAuth : MonoBehaviour
         string signupPayload = $"{{\"email\":\"{email}\",\"password\":\"{password}\"}}";
         byte[] signupBody = Encoding.UTF8.GetBytes(signupPayload);
 
-        UnityWebRequest signupRequest = new UnityWebRequest(signupUrl, "POST");
-        signupRequest.uploadHandler = new UploadHandlerRaw(signupBody);
-        signupRequest.downloadHandler = new DownloadHandlerBuffer();
-        signupRequest.SetRequestHeader("Content-Type", "application/json");
-        signupRequest.SetRequestHeader("apikey", anonKey);
-
-        yield return signupRequest.SendWebRequest();
-
-        if (signupRequest.result == UnityWebRequest.Result.Success)
+        using (var signupRequest = new UnityWebRequest(signupUrl, "POST"))
         {
-            Debug.Log("✅ SignUp successful.");
+            signupRequest.uploadHandler = new UploadHandlerRaw(signupBody);
+            signupRequest.downloadHandler = new DownloadHandlerBuffer();
+            signupRequest.disposeUploadHandlerOnDispose = true;
+            signupRequest.disposeDownloadHandlerOnDispose = true;
+            signupRequest.SetRequestHeader("Content-Type", "application/json");
+            signupRequest.SetRequestHeader("apikey", anonKey);
 
-            // 🔽 Parse the response here
-            SupabaseAuthResponse parsed = JsonUtility.FromJson<SupabaseAuthResponse>(signupRequest.downloadHandler.text);
-            AccessToken = parsed.access_token;
-            Debug.Log("uid: " + parsed.user.id);
+            yield return signupRequest.SendWebRequest();
 
-            // 🛠️ Patch study_codes to associate this UID
-            string patchUrl = $"{supabaseUrl}/rest/v1/study_codes?study_code=eq.{studyCode}";
-            string patchPayload = $"{{\"uid\":\"{parsed.user.id}\",\"class_code\":\"{classCode}\"}}";
-            byte[] patchBody = Encoding.UTF8.GetBytes(patchPayload);
-
-            // UnityWebRequest patchRequest = UnityWebRequest.Put(patchUrl, patchBody);
-            UnityWebRequest patchRequest = new UnityWebRequest(patchUrl, "PATCH");  // ✅ PATCH, not PUT
-            patchRequest.uploadHandler = new UploadHandlerRaw(patchBody);
-            patchRequest.downloadHandler = new DownloadHandlerBuffer();
-
-            patchRequest.SetRequestHeader("Content-Type", "application/json");
-            patchRequest.SetRequestHeader("apikey", anonKey);
-            patchRequest.SetRequestHeader("Authorization", "Bearer " + AccessToken);
-            patchRequest.SetRequestHeader("Prefer", "return=representation");
-
-            yield return patchRequest.SendWebRequest();
-
-            if (patchRequest.result == UnityWebRequest.Result.Success)
+            if (signupRequest.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("✅ study_codes table patched with UID");
+                Debug.Log("✅ SignUp successful.");
+
+                SupabaseAuthResponse parsed = JsonUtility.FromJson<SupabaseAuthResponse>(signupRequest.downloadHandler.text);
+                AccessToken = parsed.access_token;
+                Debug.Log("uid: " + parsed.user.id);
+
+                string patchUrl = $"{supabaseUrl}/rest/v1/study_codes?study_code=eq.{studyCode}";
+                string patchPayload = $"{{\"uid\":\"{parsed.user.id}\",\"class_code\":\"{classCode}\"}}";
+                byte[] patchBody = Encoding.UTF8.GetBytes(patchPayload);
+
+                using (var patchRequest = new UnityWebRequest(patchUrl, "PATCH"))
+                {
+                    patchRequest.uploadHandler = new UploadHandlerRaw(patchBody);
+                    patchRequest.downloadHandler = new DownloadHandlerBuffer();
+                    patchRequest.disposeUploadHandlerOnDispose = true;
+                    patchRequest.disposeDownloadHandlerOnDispose = true;
+
+                    patchRequest.SetRequestHeader("Content-Type", "application/json");
+                    patchRequest.SetRequestHeader("apikey", anonKey);
+                    patchRequest.SetRequestHeader("Authorization", "Bearer " + AccessToken);
+                    patchRequest.SetRequestHeader("Prefer", "return=representation");
+
+                    yield return patchRequest.SendWebRequest();
+
+                    if (patchRequest.result == UnityWebRequest.Result.Success)
+                    {
+                        Debug.Log("✅ study_codes table patched with UID");
+                    }
+                    else
+                    {
+                        Debug.LogError("❌ Failed to patch study_codes: " + patchRequest.downloadHandler.text);
+                    }
+                }
+
+                yield return CreateSession(signupRequest.downloadHandler.text, studyCode);
             }
             else
             {
-                Debug.LogError("❌ Failed to patch study_codes: " + patchRequest.downloadHandler.text);
+                Debug.LogError("❌ SignUp failed: " + signupRequest.downloadHandler.text);
             }
-
-            yield return CreateSession(signupRequest.downloadHandler.text, studyCode);
-        }
-        else
-        {
-            Debug.LogError("❌ SignUp failed: " + signupRequest.downloadHandler.text);
         }
     }
 
@@ -175,23 +186,27 @@ public class SupabaseAuth : MonoBehaviour
         string sessionPayload = $"{{\"study_code\":\"{studyCode}\"}}";
         Debug.Log("📤 Sending session start payload: " + sessionPayload);
 
-        UnityWebRequest sessionRequest = new UnityWebRequest(startSessionFunctionURL, "POST");
-        sessionRequest.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(sessionPayload));
-        sessionRequest.downloadHandler = new DownloadHandlerBuffer();
-        sessionRequest.SetRequestHeader("Content-Type", "application/json");
-        sessionRequest.SetRequestHeader("Authorization", "Bearer " + AccessToken);
-
-        yield return sessionRequest.SendWebRequest();
-
-        if (sessionRequest.result == UnityWebRequest.Result.Success)
+        using (var sessionRequest = new UnityWebRequest(startSessionFunctionURL, "POST"))
         {
-            var sessionResponse = JsonUtility.FromJson<SessionResponse>(sessionRequest.downloadHandler.text);
-            SessionId = sessionResponse.session_id;
-            Debug.Log("🟢 Session started. ID: " + SessionId);
-        }
-        else
-        {
-            Debug.LogError("❌ Session start failed: " + sessionRequest.downloadHandler.text);
+            sessionRequest.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(sessionPayload));
+            sessionRequest.downloadHandler = new DownloadHandlerBuffer();
+            sessionRequest.disposeUploadHandlerOnDispose = true;
+            sessionRequest.disposeDownloadHandlerOnDispose = true;
+            sessionRequest.SetRequestHeader("Content-Type", "application/json");
+            sessionRequest.SetRequestHeader("Authorization", "Bearer " + AccessToken);
+
+            yield return sessionRequest.SendWebRequest();
+
+            if (sessionRequest.result == UnityWebRequest.Result.Success)
+            {
+                var sessionResponse = JsonUtility.FromJson<SessionResponse>(sessionRequest.downloadHandler.text);
+                SessionId = sessionResponse.session_id;
+                Debug.Log("🟢 Session started. ID: " + SessionId);
+            }
+            else
+            {
+                Debug.LogError("❌ Session start failed: " + sessionRequest.downloadHandler.text);
+            }
         }
     }
 
@@ -220,30 +235,34 @@ public class SupabaseAuth : MonoBehaviour
     private IEnumerator SendSessionEndPatch(string url, string jsonPayload)
     {
         byte[] body = Encoding.UTF8.GetBytes(jsonPayload);
-        UnityWebRequest patchRequest = new UnityWebRequest(url, "PATCH");
-        patchRequest.uploadHandler = new UploadHandlerRaw(body);
-        patchRequest.downloadHandler = new DownloadHandlerBuffer();
-        patchRequest.SetRequestHeader("Content-Type", "application/json");
-        patchRequest.SetRequestHeader("apikey", anonKey);
-        patchRequest.SetRequestHeader("Authorization", "Bearer " + AccessToken);
-        patchRequest.SetRequestHeader("Prefer", "return=representation");
-
-        yield return patchRequest.SendWebRequest();
-
-        if (patchRequest.result == UnityWebRequest.Result.Success)
+        using (var patchRequest = new UnityWebRequest(url, "PATCH"))
         {
-            Debug.Log("✅ Session ended successfully.");
-            Debug.Log("SessionId being patched: " + SessionId);
-            Debug.Log("📦 Supabase response: " + patchRequest.downloadHandler.text);
-            // Application.Quit(); // Temporarily disabled for testing
-            // #if UNITY_EDITOR
-            // UnityEditor.EditorApplication.isPlaying = false;
-            // #endif
-        }
-        else
-        {
-            Debug.LogError("❌ Failed to patch session end.");
-            Debug.LogError("📦 Supabase response: " + patchRequest.downloadHandler.text);
+            patchRequest.uploadHandler = new UploadHandlerRaw(body);
+            patchRequest.downloadHandler = new DownloadHandlerBuffer();
+            patchRequest.disposeUploadHandlerOnDispose = true;
+            patchRequest.disposeDownloadHandlerOnDispose = true;
+            patchRequest.SetRequestHeader("Content-Type", "application/json");
+            patchRequest.SetRequestHeader("apikey", anonKey);
+            patchRequest.SetRequestHeader("Authorization", "Bearer " + AccessToken);
+            patchRequest.SetRequestHeader("Prefer", "return=representation");
+
+            yield return patchRequest.SendWebRequest();
+
+            if (patchRequest.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("✅ Session ended successfully.");
+                Debug.Log("SessionId being patched: " + SessionId);
+                Debug.Log("📦 Supabase response: " + patchRequest.downloadHandler.text);
+                // Application.Quit(); // Temporarily disabled for testing
+                // #if UNITY_EDITOR
+                // UnityEditor.EditorApplication.isPlaying = false;
+                // #endif
+            }
+            else
+            {
+                Debug.LogError("❌ Failed to patch session end.");
+                Debug.LogError("📦 Supabase response: " + patchRequest.downloadHandler.text);
+            }
         }
     }
 

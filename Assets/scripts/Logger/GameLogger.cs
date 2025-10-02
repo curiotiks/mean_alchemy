@@ -244,7 +244,7 @@ public class GameLogger : MonoBehaviour
 
         if (string.IsNullOrEmpty(authScript.SessionId))
         {
-            Debug.LogError("⚠️ Cannot log: Session ID not available.");
+            Debug.LogWarning("GameLogger: No session yet; skipping log.");
             yield break;
         }
 
@@ -265,26 +265,30 @@ public class GameLogger : MonoBehaviour
         Debug.Log("📦 Full payload: " + dynamicPayload);
 
         byte[] body = Encoding.UTF8.GetBytes(fullPayload);
-
         string url = $"{supabaseUrl}/rest/v1/{logTable}";
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        request.uploadHandler = new UploadHandlerRaw(body);
-        request.downloadHandler = new DownloadHandlerBuffer();
 
-        request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("apikey", anonKey);
-        request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
-        request.SetRequestHeader("Prefer", "return=representation");
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
+        using (var request = new UnityWebRequest(url, "POST"))
         {
-            Debug.Log("📝 Event logged: " + jsonPayload);
-        }
-        else
-        {
-            Debug.LogError("❌ Failed to log event: " + request.downloadHandler.text);
+            request.uploadHandler = new UploadHandlerRaw(body);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.disposeUploadHandlerOnDispose = true;
+            request.disposeDownloadHandlerOnDispose = true;
+
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("apikey", anonKey);
+            request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
+            request.SetRequestHeader("Prefer", "return=representation");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("📝 Event logged: " + jsonPayload);
+            }
+            else
+            {
+                Debug.LogWarning("❌ Failed to log event: " + request.downloadHandler.text);
+            }
         }
     }
 
@@ -429,32 +433,37 @@ public class GameLogger : MonoBehaviour
         string jsonBody = SerializeToJson(payloadDict);
         byte[] body = Encoding.UTF8.GetBytes(jsonBody);
         string url = $"{supabaseUrl}/rest/v1/{logTable}";
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        request.uploadHandler = new UploadHandlerRaw(body);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("apikey", anonKey);
-        request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
-        request.SetRequestHeader("Prefer", "return=representation");
 
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
+        using (var request = new UnityWebRequest(url, "POST"))
         {
-            string txt = request.downloadHandler.text?.Trim();
-            string id = ParseFirstIdFromArray(txt);
-            if (!string.IsNullOrEmpty(id))
+            request.uploadHandler = new UploadHandlerRaw(body);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.disposeUploadHandlerOnDispose = true;
+            request.disposeDownloadHandlerOnDispose = true;
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("apikey", anonKey);
+            request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
+            request.SetRequestHeader("Prefer", "return=representation");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
             {
-                onSuccess?.Invoke(id);
+                string txt = request.downloadHandler.text?.Trim();
+                string id = ParseFirstIdFromArray(txt);
+                if (!string.IsNullOrEmpty(id))
+                {
+                    onSuccess?.Invoke(id);
+                }
+                else
+                {
+                    onError?.Invoke($"Insert ok but could not parse id. Response: {txt}");
+                }
             }
             else
             {
-                onError?.Invoke($"Insert ok but could not parse id. Response: {txt}");
+                onError?.Invoke(request.downloadHandler.text);
             }
-        }
-        else
-        {
-            onError?.Invoke(request.downloadHandler.text);
         }
     }
 
@@ -513,23 +522,27 @@ public class GameLogger : MonoBehaviour
         byte[] body = Encoding.UTF8.GetBytes(jsonArray);
 
         string url = $"{supabaseUrl}/rest/v1/battle_turns";
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        request.uploadHandler = new UploadHandlerRaw(body);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("apikey", anonKey);
-        request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
-        request.SetRequestHeader("Prefer", "return=minimal");
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
+        using (var request = new UnityWebRequest(url, "POST"))
         {
-            onSuccess?.Invoke();
-        }
-        else
-        {
-            onError?.Invoke(request.downloadHandler.text);
+            request.uploadHandler = new UploadHandlerRaw(body);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.disposeUploadHandlerOnDispose = true;
+            request.disposeDownloadHandlerOnDispose = true;
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("apikey", anonKey);
+            request.SetRequestHeader("Authorization", "Bearer " + authScript.AccessToken);
+            request.SetRequestHeader("Prefer", "return=minimal");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                onSuccess?.Invoke();
+            }
+            else
+            {
+                onError?.Invoke(request.downloadHandler.text);
+            }
         }
     }
 
