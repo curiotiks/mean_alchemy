@@ -5,37 +5,19 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/Unused Scenes/Start_Town.unity
-    guid: 4e8672f691f49dc43a93e1af300331fd
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/Scenes/Game Scenes/Combat.unity
-    guid: d513b49acff702148aec445219270e35
-  - enabled: 0
-    path: Assets/Scenes/Unused Scenes/InnBasement.unity
-    guid: da89c6db9cb62d541878d1fe25ab0bf5
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
+    path: Assets/Scenes/Game Scenes/LogInScene.unity
+    guid: d00dd426121214abb88ec11d6645359d
   - enabled: 1
     path: Assets/Scenes/Game Scenes/TheLab.unity
     guid: 1f87fac429a3f49d092fe9a037330aa4
   - enabled: 1
-    path: Assets/Scenes/Unused Scenes/WorldMap.unity
-    guid: aeb956fbed1064087a5db1ea69395872
+    path: Assets/Scenes/Game Scenes/BountyBoard.unity
+    guid: 55e87dc3139ec1b42802f0545d676e2f
   - enabled: 1
     path: Assets/Scenes/Game Scenes/AlchemyTable.unity
     guid: 9bbf8c636079f4468a34ac96e1f59a98
   - enabled: 1
-    path: Assets/Scenes/Game Scenes/BountyBoard.unity
-    guid: 55e87dc3139ec1b42802f0545d676e2f
+    path: Assets/Scenes/Game Scenes/Combat.unity
+    guid: d513b49acff702148aec445219270e35
   m_configObjects: {}
