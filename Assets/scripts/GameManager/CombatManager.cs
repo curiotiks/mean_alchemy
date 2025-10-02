@@ -38,6 +38,17 @@ public class CombatManager : MonoBehaviour
     [SerializeField] private GameObject attackImage;
 
     // ─────────────────────────────────────────────────────────────────────────────
+    // Familiar Sprites (either SpriteRenderer or UI Image)
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Header("Familiar Sprites")]
+    [SerializeField] private SpriteRenderer playerFamiliarSR;
+    [SerializeField] private SpriteRenderer enemyFamiliarSR;
+    [SerializeField] private Image playerFamiliarImage;
+    [SerializeField] private Image enemyFamiliarImage;
+    [SerializeField] private Sprite defaultPlayerFamiliar;
+    [SerializeField] private Sprite defaultEnemyFamiliar;
+
+    // ─────────────────────────────────────────────────────────────────────────────
     // Runtime Data
     // ─────────────────────────────────────────────────────────────────────────────
     [Header("Runtime Data")]
@@ -130,26 +141,30 @@ public class CombatManager : MonoBehaviour
     public void StartCombat()
     {
         Debug.Log("Start Combat");
+        // Always apply defaults first (works even if no bounty is selected yet)
+        ApplyFamiliarSprites();
         //userInfo_temp_for_combat = GameManager.instance.userInfo.deepCopy();
-        userInfo_temp_for_combat = new UserInfo("Player1", 
-                                                "1102", 
-                                                500, 
-                                                3, 
-                                                1000, 
-                                                3, 
-                                                Random.Range(20, 31), 
+        userInfo_temp_for_combat = new UserInfo("Player1",
+                                                "1102",
+                                                500,
+                                                3,
+                                                1000,
+                                                3,
+                                                Random.Range(20, 31),
                                                 Random.Range(-2f, 2f),
-                                                SpawnLocation.Default); // Default Spawn Location   
-        if (!BountyBoardManager.instance)
+                                                SpawnLocation.Default); // Default Spawn Location
+        // If a bounty is available, load it and re-apply sprites; otherwise keep defaults
+        if (BountyBoardManager.instance != null && BountyBoardManager.instance.currentBounty != null)
         {
-            enabled = false;
-            this.gameObject.SetActive(false);
-            return;
+            bountyItem_info = BountyBoardManager.instance.currentBounty.bountyItem.deepCopy();
+            ApplyFamiliarSprites(); // updates enemy to bounty sprite
         }
-        bountyItem_info = BountyBoardManager.instance.currentBounty.bountyItem.deepCopy();
+        else
+        {
+            Debug.LogWarning("CombatManager: No selected bounty found. Using default enemy familiar sprite.");
+        }
 
-
-        Debug.Log(userInfo_temp_for_combat+"userHPbar: "+userHPbar);
+        Debug.Log(userInfo_temp_for_combat + "userHPbar: " + userHPbar);
         Debug.Log("User Info: " + userInfo_temp_for_combat.mean + " " + userInfo_temp_for_combat.sd);
 
         userHPbar.maxValue = userInfo_temp_for_combat.mean;
@@ -439,10 +454,79 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+    private void ApplyFamiliarSprites()
+    {
+        // Player familiar: static for now
+        if (playerFamiliarSR != null)
+            playerFamiliarSR.sprite = defaultPlayerFamiliar;
+        if (playerFamiliarImage != null)
+            playerFamiliarImage.sprite = defaultPlayerFamiliar;
+
+        // Enemy familiar: try from selected bounty; fallback to default
+        Sprite enemySprite = LoadBountySprite();
+        Sprite enemyFinal = enemySprite != null ? enemySprite : defaultEnemyFamiliar;
+
+        if (enemyFamiliarSR != null)
+            enemyFamiliarSR.sprite = enemyFinal;
+        if (enemyFamiliarImage != null)
+            enemyFamiliarImage.sprite = enemyFinal;
+    }
+
+    private Sprite LoadBountySprite()
+    {
+        // Attempt to resolve the bounty sprite from the current bounty info.
+        // Preferred path: use a Resources path stored on the bounty item (e.g., "Bounties/Wisp_01").
+        if (bountyItem_info == null) return null;
+
+        // Try common string path fields
+        try
+        {
+            var imageField = bountyItem_info.GetType().GetField("image");
+            if (imageField != null)
+            {
+                var val = imageField.GetValue(bountyItem_info) as string;
+                if (!string.IsNullOrEmpty(val))
+                {
+                    var s = Resources.Load<Sprite>(val);
+                    if (s != null) return s;
+                }
+            }
+        }
+        catch {}
+        try
+        {
+            var imagePathField = bountyItem_info.GetType().GetField("imagePath");
+            if (imagePathField != null)
+            {
+                var val = imagePathField.GetValue(bountyItem_info) as string;
+                if (!string.IsNullOrEmpty(val))
+                {
+                    var s = Resources.Load<Sprite>(val);
+                    if (s != null) return s;
+                }
+            }
+        }
+        catch {}
+
+        // Direct Sprite field fallback
+        try
+        {
+            var spriteField = bountyItem_info.GetType().GetField("sprite");
+            if (spriteField != null)
+            {
+                var spr = spriteField.GetValue(bountyItem_info) as Sprite;
+                if (spr != null) return spr;
+            }
+        }
+        catch {}
+
+        return null;
+    }
+
     private void OnValidate()
     {
         // Auto-assign the catalog in the editor when possible so the EventRef drawer shows dropdowns
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         if (catalog == null)
         {
             var gl = FindObjectOfType<GameLogger>();
@@ -460,6 +544,6 @@ public class CombatManager : MonoBehaviour
                 }
             }
         }
-        #endif
+#endif
     }
 }

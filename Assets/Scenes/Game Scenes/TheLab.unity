@@ -210,10 +210,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6a1c738e2fc54b5aa9b5e2bb5556614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 0}
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
   eventRef:
-    category: 
-    key: 
+    category: Location
+    key: 'table '
   logOnButtonClick: 0
   logOnCollision: 1
   playerTag: Player
@@ -2572,7 +2572,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.008690357, y: -0.66204023}
+  m_Offset: {x: -0.008690357, y: -1.2203006}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -2583,7 +2583,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.9763498, y: 0.6470003}
+  m_Size: {x: 0.93122387, y: 0.5470207}
   m_EdgeRadius: 0
 --- !u!114 &1017513108
 MonoBehaviour:
@@ -2760,7 +2760,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1031978770}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.08, y: 1.971, z: 0}
+  m_LocalPosition: {x: -2.08, y: 1.05, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2834,10 +2834,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6a1c738e2fc54b5aa9b5e2bb5556614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 0}
+  catalog: {fileID: 11400000, guid: 51dfe9484426045f99e2e13ad77f8e1a, type: 2}
   eventRef:
-    category: 
-    key: 
+    category: Location
+    key: combat
   logOnButtonClick: 0
   logOnCollision: 1
   playerTag: Player
@@ -12492,6 +12492,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 6719396664895776880, guid: 6f7822c23fa614923a2c6310af34668f,
+        type: 3}
+      propertyPath: userInfo.lastSpawnLocation
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
