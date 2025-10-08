@@ -10,6 +10,10 @@ public class GameManager : MonoBehaviour {
         {
             instance = this;
             DontDestroyOnLoad(this);
+            // Initialize familiar powered state from PlayerPrefs once per app run
+            FamiliarState.LoadFromPrefs();
+            // Ensure any WarpGates already in the scene reflect current state
+            WarpGate.RefreshAllGates();
         }
         else
         {
@@ -50,5 +54,19 @@ public class GameManager : MonoBehaviour {
             userInfo.mean = newMean;
             userInfo.sd = newSD;
         }
+    }
+
+    /// <summary>
+    /// Returns whether the player currently has a powered familiar (session truth).
+    /// </summary>
+    public bool HasPoweredFamiliar() => FamiliarState.Powered;
+
+    /// <summary>
+    /// Sets the powered familiar state and refreshes all warp gates.
+    /// </summary>
+    public void SetPoweredFamiliar(bool powered)
+    {
+        FamiliarState.SetPowered(powered);
+        WarpGate.RefreshAllGates();
     }
 }

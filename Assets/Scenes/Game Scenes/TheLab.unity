@@ -3587,6 +3587,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 9099840690209633433}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1970602614 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9099840692043265775, guid: debed849a0a544383865cdb32321820b,
+    type: 3}
+  m_PrefabInstance: {fileID: 9099840690209633433}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cba7b17e29964e8e8725c0cab0394b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1984580968
 GameObject:
   m_ObjectHideFlags: 0
@@ -12384,7 +12396,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.020462513, y: 0.07403899}
@@ -12413,6 +12425,7 @@ GameObject:
   - component: {fileID: 7261674857191803097}
   - component: {fileID: 1094875693}
   - component: {fileID: 1094875694}
+  - component: {fileID: 7261674857191803099}
   m_Layer: 0
   m_Name: exit_to_world
   m_TagString: Untagged
@@ -12420,6 +12433,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &7261674857191803099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7261674857191803098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9df6bb06462cc47c18cbcd314dd75d20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 2
+  indicator: {fileID: 1970602614}
+  sceneToLoad: Combat
+  blockedMessage: You need a selected bounty AND a powered familiar (use the table).
 --- !u!1001 &7380745434141891066
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -103,6 +103,13 @@ public sealed class TransmuteManager : MonoBehaviour
             {
                 Debug.LogWarning("GameLogger not found; transmutation was not sent to server.");
             }
+
+            // Mark familiar as powered (centralized state) and refresh warp gates
+            FamiliarState.SetPowered(true);
+            WarpGate.RefreshAllGates();
+#if UNITY_EDITOR
+            Debug.Log("[TransmuteManager] Familiar powered -> gates refreshed (FamiliarState)");
+#endif
         }
         catch (Exception ex)
         {
@@ -150,5 +157,16 @@ public sealed class TransmuteManager : MonoBehaviour
         }
 
         File.WriteAllText(path, existing);
+    }
+    /// <summary>
+    /// Clears the powered-familiar flag and refreshes any WarpGates. Call when the familiar is reset.
+    /// </summary>
+    public static void ClearPoweredFamiliar()
+    {
+        FamiliarState.SetPowered(false);
+        WarpGate.RefreshAllGates();
+#if UNITY_EDITOR
+        Debug.Log("[TransmuteManager] Familiar cleared -> gates refreshed (FamiliarState)");
+#endif
     }
 }

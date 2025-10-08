@@ -394,6 +394,7 @@ public class CombatManager : MonoBehaviour
         if (logger == null)
         {
             Debug.LogWarning("GameLogger not present; battle report not sent. Loading next scene anyway.");
+            ClearFamiliarAndRelockWarp();
             SafeLoadNextScene();
             return;
         }
@@ -423,18 +424,50 @@ public class CombatManager : MonoBehaviour
                 logger.LogBattleTurnsBulk(eventId, rows,
                     onSuccess: () => {
                         Debug.Log($"Battle report sent with {rows.Count} turns. Id=" + eventId);
+                        ClearFamiliarAndRelockWarp();
                         SafeLoadNextScene();
                     },
                     onError: (err) => {
                         Debug.LogError("Battle turns insert failed: " + err);
+                        ClearFamiliarAndRelockWarp();
                         SafeLoadNextScene();
                     });
             },
             onError: (err) => {
                 Debug.LogError("Battle summary insert failed: " + err);
+                ClearFamiliarAndRelockWarp();
                 SafeLoadNextScene();
             }
         );
+    }
+
+    /// <summary>
+    /// Clears the powered familiar state and refreshes warp gates so Lab's combat warp re-locks.
+    /// </summary>
+    private void ClearFamiliarAndRelockWarp()
+    {
+        try
+        {
+            var tm = GameObject.FindObjectOfType<TransmuteManager>();
+            if (tm != null)
+            {
+                tm.TransmuteEraseNew();
+            }
+        }
+        catch {}
+        TransmuteManager.ClearPoweredFamiliar();
+        // Ensure any gates in the next scene reflect the cleared state ASAP
+        WarpGate.RefreshAllGates();
+    }
+
+    private void OnDisable()
+    {
+        if (!Application.isPlaying) return;
+        // Only attempt if battle ended (to avoid clearing on accidental disable)
+        if (_battleEnded)
+        {
+            ClearFamiliarAndRelockWarp();
+        }
     }
 
     private void SafeLoadNextScene()
