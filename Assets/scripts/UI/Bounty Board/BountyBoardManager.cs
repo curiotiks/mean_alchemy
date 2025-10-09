@@ -6,6 +6,7 @@ using System.IO;
 using System;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class BountyBoardManager : MonoBehaviour
 {
@@ -285,6 +286,28 @@ public class BountyBoardManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Clears the selected bounty without changing scenes and refreshes warp gates.
+    /// </summary>
+    public void ClearCurrentBounty(bool log = true)
+    {
+        if (currentBounty != null && log)
+        {
+            try
+            {
+                GameLogger.Instance?.LogEvent("bounty_abandoned_from_lab",
+                    $"key={currentBounty.bountyItem?.name ?? "unknown"}");
+            }
+            catch {}
+        }
+
+        currentBounty = null;
+        WarpGate.RefreshAllGates();
+#if UNITY_EDITOR
+        Debug.Log("[BountyBoardManager] currentBounty cleared (Lab abandon).");
+#endif
+    }
+
+    /// <summary>
     /// SceneLoaded callback: rebinds panel references, restores the selected bounty into non-board scenes,
     /// then (re)initializes the board and unsubscribes itself.
     /// </summary>
@@ -332,13 +355,24 @@ public class BountyBoardManager : MonoBehaviour
             bcard.abandonButton.enabled = true;
             bcard.abandonButton.gameObject.SetActive(true);
             bcard.acceptButton.enabled = false;
-            bcard.abandonButton.onClick.RemoveAllListeners();
+
+            // Replace any persistent listeners to avoid unexpected scene loads
+            bcard.abandonButton.onClick = new Button.ButtonClickedEvent();
             bcard.abandonButton.onClick.AddListener(() =>
             {
-                HardLoadScene("BountyBoard");
+                // Log + clear selection
+                ClearCurrentBounty(false);
+                try
+                {
+                    GameLogger.Instance?.LogEvent("bounty_abandoned_from_lab",
+                        $"key={src.name}");
+                }
+                catch {}
+
+                // Hide the badge panel in the Lab and destroy this instantiated card
+                if (selectedCardPanel) selectedCardPanel.SetActive(false);
+                if (instantiatedCard) Destroy(instantiatedCard);
             });
-            //_gameObject.GetComponent<BountyCard>().CustomMethodForBountyBoard();
-            selectedCardPanel.SetActive(true);
         }
 
         if (CardHolderParent)

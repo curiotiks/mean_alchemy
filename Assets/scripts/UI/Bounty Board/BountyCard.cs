@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using BountyItemData;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class BountyCard : MonoBehaviour
 {
@@ -38,7 +39,9 @@ public class BountyCard : MonoBehaviour
         //bountyItem = new BountyItem("Test", null, 10, 1, "Easy" ,new
         //    List<RewardEntry>());
         if(selectedCardPanel)
-        selectedCardPanel.SetActive(false); 
+            selectedCardPanel.SetActive(false); 
+        if (selectedCardPanel == null)
+            selectedCardPanel = GameObject.FindGameObjectWithTag("selectedcardholder");
     }
 
     public BountyItem getCardInfo()
@@ -52,18 +55,6 @@ public class BountyCard : MonoBehaviour
         isSelected = false;
         InitializeCard();
     }
-
-    //public void CustomMethodForBountyBoard()
-    //{
-
-    //    abandonButton.enabled = true;
-    //    acceptButton.enabled = false;
-    //    abandonButton.onClick.RemoveAllListeners();
-    //    abandonButton.onClick.AddListener(() =>
-    //    {
-    //        BountyBoardManager.instance.HardLoadScene("BountyBoard");
-    //    });
-    //}
 
     private void InitializeCard()
     {
@@ -109,51 +100,95 @@ public class BountyCard : MonoBehaviour
         cardHolderParent = transform.parent;
 
 
-        // Set up the button listeners
-        mainSelectionButton.onClick.RemoveAllListeners();
-        mainSelectionButton.onClick.AddListener(() =>
-        {
-            //Debug.Log($"Showing {bountyItem.name}");
-            isSelected = true;
-            HandleCardSelection();
-        });
+        // --- Button listeners: wipe any persistent Inspector hooks first, then add code listeners ---
 
-        closeButton.onClick.RemoveAllListeners();
-        closeButton.gameObject.SetActive(false);
-        //closeButton.enabled = isSelected;
-        //closeButton.interactable = isSelected;
-        closeButton.onClick.AddListener(() =>
+        // Main select
+        if (mainSelectionButton)
         {
-            isSelected = false;
-            HandleCloseSelection();
-        });
+            if (mainSelectionButton.onClick.GetPersistentEventCount() > 0)
+                Debug.LogWarning($"[BountyCard] mainSelectionButton had {mainSelectionButton.onClick.GetPersistentEventCount()} persistent listeners. Replacing to avoid unintended scene loads.");
+            mainSelectionButton.onClick = new Button.ButtonClickedEvent(); // wipes persistent listeners
+            mainSelectionButton.onClick.AddListener(() =>
+            {
+                isSelected = true;
+                HandleCardSelection();
+            });
+        }
 
-        acceptButton.onClick.RemoveAllListeners();
-        acceptButton.gameObject.SetActive(false);
-        //acceptButton.enabled = isSelected;
-        //acceptButton.interactable = isSelected;
-        acceptButton.onClick.AddListener(() =>
+        // Close
+        if (closeButton)
         {
-            Debug.Log("Bounty Accepted: " + bountyItem.name);
-            isSelected = false;
-            HandleCardAcceptance();
-        });
+            if (closeButton.onClick.GetPersistentEventCount() > 0)
+                Debug.LogWarning($"[BountyCard] closeButton had {closeButton.onClick.GetPersistentEventCount()} persistent listeners. Replacing.");
+            closeButton.gameObject.SetActive(false);
+            closeButton.onClick = new Button.ButtonClickedEvent();
+            closeButton.onClick.AddListener(() =>
+            {
+                isSelected = false;
+                HandleCloseSelection();
+            });
+        }
 
-        abandonButton.onClick.RemoveAllListeners();
-        abandonButton.gameObject.SetActive(false);
-        //abandonButton.enabled = isSelected;
-        //abandonButton.interactable = isSelected;
-        abandonButton.onClick.AddListener(() =>
+        // Accept
+        if (acceptButton)
         {
-            Debug.Log("Bounty Abandoned: " + bountyItem.name);
-            isSelected = false;
-            HandleAbandonSelection();
-        });
+            if (acceptButton.onClick.GetPersistentEventCount() > 0)
+                Debug.LogWarning($"[BountyCard] acceptButton had {acceptButton.onClick.GetPersistentEventCount()} persistent listeners. Replacing.");
+            acceptButton.gameObject.SetActive(false);
+            acceptButton.onClick = new Button.ButtonClickedEvent();
+            acceptButton.onClick.AddListener(() =>
+            {
+                Debug.Log("Bounty Accepted: " + bountyItem.name);
+                isSelected = false;
+                HandleCardAcceptance();
+            });
+        }
+
+        // Abandon
+        if (abandonButton)
+        {
+            if (abandonButton.onClick.GetPersistentEventCount() > 0)
+                Debug.LogWarning($"[BountyCard] abandonButton had {abandonButton.onClick.GetPersistentEventCount()} persistent listeners. Replacing.");
+            abandonButton.gameObject.SetActive(false);
+            abandonButton.onClick = new Button.ButtonClickedEvent();
+            abandonButton.onClick.AddListener(() =>
+            {
+                Debug.Log("Bounty Abandoned: " + bountyItem.name);
+                isSelected = false;
+                HandleAbandonSelection();
+            });
+        }
     }
 
 
     private void HandleCardSelection()
     {
+        if (selectedCardPanel == null)
+        {
+            Debug.LogWarning("[BountyCard] No selectedCardPanel found in this scene (tag 'selectedcardholder'). Skipping move-to-panel UI.");
+            // Still show appropriate buttons without moving the card in hierarchy
+            closeButton?.gameObject.SetActive(isSelected);
+            if (BountyBoardManager.instance.currentBounty)
+            {
+                if (BountyBoardManager.instance.currentBounty.bountyItem.name == bountyItem.name)
+                {
+                    abandonButton?.gameObject.SetActive(true);
+                    acceptButton?.gameObject.SetActive(false);
+                }
+                else
+                {
+                    abandonButton?.gameObject.SetActive(false);
+                    acceptButton?.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                acceptButton?.gameObject.SetActive(isSelected);
+                abandonButton?.gameObject.SetActive(!isSelected);
+            }
+            if (isSelected) LogKey(EV_VIEW);
+            return;
+        }
         selectedCardPanel.SetActive(isSelected);
         this.transform.SetParent(selectedCardPanel.transform);
         this.transform.localPosition = Vector3.zero;
@@ -209,14 +244,6 @@ public class BountyCard : MonoBehaviour
 
         BountyBoardManager.instance.currentBounty = tempBountyCard.GetComponent<BountyCard>();
 
-        //BountyBoardManager.instance.currentBounty = tempBountyCard.GetComponent<BountyCard>();
-        //BountyBoardManager.instance.currentBounty.abandonButton.enabled = true;
-        //BountyBoardManager.instance.currentBounty.acceptButton.enabled = false;
-        //BountyBoardManager.instance.currentBounty.abandonButton.onClick.RemoveAllListeners();
-        //BountyBoardManager.instance.currentBounty.abandonButton.onClick.AddListener(() =>
-        //{
-        //    BountyBoardManager.instance.HardLoadScene("BountyBoard");
-        //});
         LogKey(EV_ACCEPT);
     }
 
