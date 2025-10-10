@@ -166,14 +166,9 @@ public class WarpGate : MonoBehaviour
             SceneManager.LoadScene(sceneToLoad);
     }
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")] private static extern void Alert(string msg);
-    private void ShowAlert(string msg) => Alert(msg);
-#else
     private void ShowAlert(string msg)
     {
         Debug.LogWarning(msg);
         // If you prefer an in-game popup, call it here.
     }
-#endif
 }
