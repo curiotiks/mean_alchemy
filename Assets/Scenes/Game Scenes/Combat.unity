@@ -1071,8 +1071,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a0d3adac5804ca189b8a34ca0af2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destScene: BountyBoard
-  spawnLocation: 1
+  destScene: TheLab
+  spawnLocation: 0
 --- !u!1 &625226612
 GameObject:
   m_ObjectHideFlags: 0

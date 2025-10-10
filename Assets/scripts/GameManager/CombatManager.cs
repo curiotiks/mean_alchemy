@@ -1,4 +1,3 @@
-using System.Net.Mime;
 using System.Collections;
 using System.Collections.Generic;
 using Stopwatch = System.Diagnostics.Stopwatch;
@@ -122,18 +121,16 @@ public class CombatManager : MonoBehaviour
 
     void Start()
     {
-        attackBtn.onClick.RemoveAllListeners();
-        attackBtn.onClick.AddListener(() =>
+        if (attackBtn != null)
         {
-            // record player click time for intervals
-            if (_sw != null && _sw.IsRunning)
+            attackBtn.onClick.RemoveAllListeners();
+            attackBtn.onClick.AddListener(() =>
             {
                 // interval measured when we create the turn entry in Attack_Coroutine
-            }
-            Attack();
-        });
-
-        attackBtn.interactable = true;
+                Attack();
+            });
+            attackBtn.interactable = true;
+        }
 
         StartCombat();
     }
@@ -219,10 +216,10 @@ public class CombatManager : MonoBehaviour
     IEnumerator AttackedByTheEnemy(){
         yield return new WaitForSeconds(0.2f);
         Debug.Log("Attacked by the enemy");
-        float calulatedDefenceDamage = getAttackedDamage(userInfo_temp_for_combat, bountyItem_info);
-        if (calulatedDefenceDamage >= userInfo_temp_for_combat.mean)
+        float calculatedDefenseDamage = getAttackedDamage(userInfo_temp_for_combat, bountyItem_info);
+        if (calculatedDefenseDamage >= userInfo_temp_for_combat.mean)
         {
-            //this means the user lose
+            // This means the user loses
             Debug.Log("User Lose");
             combatLog.text = "User Lose";
             // TODO: Implement an "end game" method for when a familiar is defeated.
@@ -230,9 +227,9 @@ public class CombatManager : MonoBehaviour
         }
         animateAttack(false, 0.2f);
         yield return new WaitForSeconds(0.2f);
-        changeHPbar(true, calulatedDefenceDamage);
+        changeHPbar(true, calculatedDefenseDamage);
         // record enemy attack turn (after HP updates)
-        RecordTurn("enemy", "attack", calulatedDefenceDamage);
+        RecordTurn("enemy", "attack", calculatedDefenseDamage);
 
         // if player died as a result of this hit, finish now
         if (userHPbar != null && userHPbar.value <= 0f && !_battleEnded)
@@ -257,28 +254,60 @@ public class CombatManager : MonoBehaviour
         StartCoroutine(Attack_Coroutine()); 
     }
 
+    /// <summary>
+    /// Flee out of combat back to the Lab (or the configured next scene) without logging turns.
+    /// Clears familiar/warps and then loads the configured next scene.
+    /// Wire your Flee button's OnClick to this (instead of SceneChanger).
+    /// </summary>
+    public void OnFleeClicked()
+    {
+        Debug.Log("[CombatManager] Flee clicked. nextSceneName=" + nextSceneName);
+
+        // Mark the battle as ended so OnDisable guard doesn't double-run
+        _battleEnded = true;
+        if (attackBtn != null) attackBtn.interactable = false;
+        if (_sw != null && _sw.IsRunning) _sw.Stop();
+
+        // Optional: set a summary outcome for consistency
+        if (_summary == null) _summary = new BattleReportSummary
+        {
+            playerName = "Player1",
+            enemyName = bountyItem_info != null ? (bountyItem_info.name ?? "Enemy") : "Enemy",
+            startTimeUtc = System.DateTime.UtcNow.ToString("o")
+        };
+        _summary.outcome = "flee";
+        _summary.endTimeUtc = System.DateTime.UtcNow.ToString("o");
+        _summary.durationSeconds = _sw != null ? (float)(_sw.ElapsedMilliseconds / 1000.0) : 0f;
+
+        // No battle-turn logging on flee for now (keep it simple)
+        ClearFamiliarAndRelockWarp();
+        SafeLoadNextScene();
+    }
+
+    [ContextMenu("TEST: Flee Now")] private void __TestFleeNow() => OnFleeClicked();
+
     IEnumerator Attack_Coroutine(){
         Debug.Log("Attack");
-        float calulatedAttackDamage = getAttackDamage(userInfo_temp_for_combat, bountyItem_info);
-        if (calulatedAttackDamage >= bountyItem_info.mean){
-            //this means the user win and HP of the enemy must be 0
+        float calculatedAttackDamage = getAttackDamage(userInfo_temp_for_combat, bountyItem_info);
+        if (calculatedAttackDamage >= bountyItem_info.mean){
+            // This means the user wins and HP of the enemy must be 0
             animateAttack(true, 0.2f);
             yield return new WaitForSeconds(0.2f);
-            changeHPbar(false, calulatedAttackDamage);
+            changeHPbar(false, calculatedAttackDamage);
             // record player attack turn (after HP updates)
-            RecordTurn("player", "attack", calulatedAttackDamage);
+            RecordTurn("player", "attack", calculatedAttackDamage);
             Debug.Log("User Win");
             // combatLog.text = "User Win";
             FinishAndSend("win");
             isExecuted = false;
             yield break;
         }else{
-            //this means that it's just normal attack to the enemy
+            // This means that it's just a normal attack to the enemy
             animateAttack(true, 0.2f);
             yield return new WaitForSeconds(0.2f);
-            changeHPbar(false, calulatedAttackDamage);
+            changeHPbar(false, calculatedAttackDamage);
             // record player attack turn (after HP updates)
-            RecordTurn("player", "attack", calulatedAttackDamage);
+            RecordTurn("player", "attack", calculatedAttackDamage);
 
             // if enemy died as a result of this hit, finish now
             if (enemyHPbar != null && enemyHPbar.value <= 0f && !_battleEnded)
@@ -289,8 +318,8 @@ public class CombatManager : MonoBehaviour
                 yield break;
             }
 
-            Debug.Log("Normal Attack");
-            //now being attacked by the enemy
+            Debug.Log("Normal attack");
+            // now being attacked by the enemy
             yield return AttackedByTheEnemy();
         }
     }
