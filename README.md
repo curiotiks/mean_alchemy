@@ -1,5 +1,7 @@
 # Mean Alchemy
 
+[🇺🇸 English Version](./README.md) | [🇨🇳 简体中文](./README.zh.md)
+
 ## 🧪 Overview
 
 **Mean Alchemy** is a 2D educational RPG that blends data science and alchemy.  
@@ -73,7 +75,7 @@ A turn-based battle space where your Familiar faces off against a bounty opponen
 
 ## 🌐 Play Online
 
-👉 [**Play Mean Alchemy on Itch.io**](https://your-itch-page-url-here)  
+👉 [**Play Mean Alchemy on Itch.io**](https://curtiks.itch.io/mean-alchemy)  
 *(Best experienced in full-screen mode on desktop browsers.)*
 
 Current test code: test001
