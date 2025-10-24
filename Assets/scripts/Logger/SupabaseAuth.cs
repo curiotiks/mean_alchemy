@@ -3,6 +3,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class SupabaseAuth : MonoBehaviour
 {
@@ -12,6 +13,12 @@ public class SupabaseAuth : MonoBehaviour
     public string supabaseUrl = "https://pllursracuxqllyzgcvr.supabase.co";
     public string anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbHVyc3JhY3V4cWxseXpnY3ZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjE4NTUsImV4cCI6MjA1OTM5Nzg1NX0.-xr1Tu0HePRdRjfgXgBikrLCBClY3iIxOoznJaqJiJs";
     public string startSessionFunctionURL = "https://pllursracuxqllyzgcvr.supabase.co/functions/v1/start_session";
+
+    [Header("Scene Flow")]
+    [Tooltip("Scene to load after a successful login + session start. Defaults to TheLab via SceneNames.")]
+    public string nextSceneName = SceneNames.TheLab;
+    [Tooltip("If true, automatically changes scene after session creation succeeds.")]
+    public bool autoChangeScene = true;
 
     [System.Serializable]
     public class StudyCodePayload
@@ -202,6 +209,7 @@ public class SupabaseAuth : MonoBehaviour
                 var sessionResponse = JsonUtility.FromJson<SessionResponse>(sessionRequest.downloadHandler.text);
                 SessionId = sessionResponse.session_id;
                 Debug.Log("🟢 Session started. ID: " + SessionId);
+                LoadNextSceneIfEnabled();
             }
             else
             {
@@ -264,6 +272,22 @@ public class SupabaseAuth : MonoBehaviour
                 Debug.LogError("📦 Supabase response: " + patchRequest.downloadHandler.text);
             }
         }
+    }
+
+    private void LoadNextSceneIfEnabled()
+    {
+        if (!autoChangeScene)
+        {
+            Debug.Log("ℹ️ Auto scene change disabled; staying on login scene.");
+            return;
+        }
+        if (string.IsNullOrEmpty(nextSceneName))
+        {
+            Debug.LogWarning("⚠️ nextSceneName is empty; cannot change scenes.");
+            return;
+        }
+        Debug.Log($"➡️ Loading scene: {nextSceneName}");
+        SceneManager.LoadScene(nextSceneName);
     }
 
     [System.Serializable] class SupabaseUser { public string id; public string email; }
