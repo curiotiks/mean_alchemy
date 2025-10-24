@@ -9,7 +9,6 @@ public class SupabaseAuth : MonoBehaviour
 {
     private static SupabaseAuth instance;
     public TMP_InputField studyCodeInput;
-    public TMP_Dropdown classCodeInput;
     public string supabaseUrl = "https://pllursracuxqllyzgcvr.supabase.co";
     public string anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbHVyc3JhY3V4cWxseXpnY3ZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjE4NTUsImV4cCI6MjA1OTM5Nzg1NX0.-xr1Tu0HePRdRjfgXgBikrLCBClY3iIxOoznJaqJiJs";
     public string startSessionFunctionURL = "https://pllursracuxqllyzgcvr.supabase.co/functions/v1/start_session";
@@ -20,11 +19,14 @@ public class SupabaseAuth : MonoBehaviour
     [Tooltip("If true, automatically changes scene after session creation succeeds.")]
     public bool autoChangeScene = true;
 
+    [Header("UI Feedback")]
+    [SerializeField] private GameObject acceptedText;   // "Accepted Text" object (inactive by default)
+    [SerializeField] private GameObject errorText;      // "Study Code Error..." object (inactive by default)
+
     [System.Serializable]
     public class StudyCodePayload
     {
         public string study_code;
-        public string class_code;
     }
 
     [HideInInspector] public string AccessToken = "";
@@ -41,19 +43,30 @@ public class SupabaseAuth : MonoBehaviour
 
         instance = this;
         DontDestroyOnLoad(this.gameObject);
+        HideAllStatus();
     }
+
+    void Update()
+    {
+    // Submit with Enter key when input field is focused
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            OnAuthenticateClicked();
+        }
+    }
+
 
     public void OnAuthenticateClicked()
     {
+        HideAllStatus();
         string studyCode = studyCodeInput.text.Trim().ToLower();
         CurrentStudyCode = studyCode;
         string email = $"{studyCode}@study.local";
         string password = $"{studyCode}123!";
-        string classCode = classCodeInput.options[classCodeInput.value].text;
-        StartCoroutine(AuthenticateFlow(email, password, studyCode, classCode));
+        StartCoroutine(AuthenticateFlow(email, password, studyCode));
     }
 
-    private IEnumerator AuthenticateFlow(string email, string password, string studyCode, string classCode)
+    private IEnumerator AuthenticateFlow(string email, string password, string studyCode)
     {
         // -- Attempt Login
         // ---- Construct the login request
@@ -76,6 +89,7 @@ public class SupabaseAuth : MonoBehaviour
             if (loginRequest.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log("✅ Login successful.");
+                ShowAccepted();
                 yield return CreateSession(loginRequest.downloadHandler.text, studyCode);
             }
             else
@@ -85,11 +99,12 @@ public class SupabaseAuth : MonoBehaviour
                     if (exists)
                     {
                         Debug.Log("🟢 Study code verified. Attempting signup...");
-                        StartCoroutine(SignUp(email, password, studyCode, classCode));
+                        StartCoroutine(SignUp(email, password, studyCode));
                     }
                     else
                     {
                         Debug.LogError("❌ Invalid study code. Cannot sign up.");
+                        ShowError();
                     }
                 });
             }
@@ -110,6 +125,7 @@ public class SupabaseAuth : MonoBehaviour
             {
                 bool exists = checkRequest.downloadHandler.text.Length > 2;
                 Debug.Log(exists ? "✅ Study code exists." : "❌ Study code does not exist.");
+                if (exists) ShowAccepted(); else ShowError();
                 callback(exists);
             }
             else
@@ -121,7 +137,7 @@ public class SupabaseAuth : MonoBehaviour
     }
 
 
-    private IEnumerator SignUp(string email, string password, string studyCode, string classCode)
+    private IEnumerator SignUp(string email, string password, string studyCode)
     {
         string signupUrl = $"{supabaseUrl}/auth/v1/signup";
         string signupPayload = $"{{\"email\":\"{email}\",\"password\":\"{password}\"}}";
@@ -141,13 +157,14 @@ public class SupabaseAuth : MonoBehaviour
             if (signupRequest.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log("✅ SignUp successful.");
+                ShowAccepted();
 
                 SupabaseAuthResponse parsed = JsonUtility.FromJson<SupabaseAuthResponse>(signupRequest.downloadHandler.text);
                 AccessToken = parsed.access_token;
                 Debug.Log("uid: " + parsed.user.id);
 
                 string patchUrl = $"{supabaseUrl}/rest/v1/study_codes?study_code=eq.{studyCode}";
-                string patchPayload = $"{{\"uid\":\"{parsed.user.id}\",\"class_code\":\"{classCode}\"}}";
+                string patchPayload = $"{{\"uid\":\"{parsed.user.id}\"}}";
                 byte[] patchBody = Encoding.UTF8.GetBytes(patchPayload);
 
                 using (var patchRequest = new UnityWebRequest(patchUrl, "PATCH"))
@@ -179,6 +196,7 @@ public class SupabaseAuth : MonoBehaviour
             else
             {
                 Debug.LogError("❌ SignUp failed: " + signupRequest.downloadHandler.text);
+                ShowError();
             }
         }
     }
@@ -288,6 +306,22 @@ public class SupabaseAuth : MonoBehaviour
         }
         Debug.Log($"➡️ Loading scene: {nextSceneName}");
         SceneManager.LoadScene(nextSceneName);
+    }
+
+    private void HideAllStatus()
+    {
+        if (acceptedText) acceptedText.SetActive(false);
+        if (errorText) errorText.SetActive(false);
+    }
+    private void ShowAccepted()
+    {
+        if (errorText) errorText.SetActive(false);
+        if (acceptedText) acceptedText.SetActive(true);
+    }
+    private void ShowError()
+    {
+        if (acceptedText) acceptedText.SetActive(false);
+        if (errorText) errorText.SetActive(true);
     }
 
     [System.Serializable] class SupabaseUser { public string id; public string email; }
