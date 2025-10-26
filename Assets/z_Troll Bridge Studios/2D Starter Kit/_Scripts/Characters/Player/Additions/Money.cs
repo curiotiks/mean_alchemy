@@ -8,6 +8,59 @@ namespace TrollBridge {
 		// The types of currencies
 		public Currency[] currency;
 
+        // Use this as the canonical name for the reputation currency
+        public const string ReputationCurrencyName = "Reputation";
+
+        /// <summary>
+        /// Convenience accessor for the Reputation amount. Returns 0 if not present.
+        /// </summary>
+        public int Reputation => GetCurrency(ReputationCurrencyName);
+
+        /// <summary>
+        /// Adds (or subtracts with negative) to the Reputation currency. Creates the entry if missing.
+        /// Automatically saves after change.
+        /// </summary>
+        public void AddReputation(int amount)
+        {
+            EnsureCurrencyExists(ReputationCurrencyName);
+            AddSubtractMoney(ReputationCurrencyName, amount);
+            Save();
+        }
+
+        /// <summary>
+        /// Sets Reputation to an explicit value. Creates the entry if missing.
+        /// Automatically saves after change.
+        /// </summary>
+        public void SetReputation(int value)
+        {
+            EnsureCurrencyExists(ReputationCurrencyName);
+            for (int i = 0; i < currency.Length; i++)
+            {
+                if (currency[i].currencyName == ReputationCurrencyName)
+                {
+                    currency[i].currencyAmount = Mathf.Max(0, value);
+                    break;
+                }
+            }
+            Save();
+        }
+
+        /// <summary>
+        /// Ensures a currency with the provided name exists; if not, appends it with amount 0.
+        /// </summary>
+        private void EnsureCurrencyExists(string name)
+        {
+            for (int i = 0; i < currency.Length; i++)
+            {
+                if (currency[i].currencyName == name)
+                    return;
+            }
+
+            // Grow the array and append a new currency entry.
+            Array.Resize(ref currency, currency.Length + 1);
+            currency[currency.Length - 1] = new Currency { currencyName = name, currencyAmount = 0 };
+        }
+
 		void Awake(){
 			Load ();
 		}
@@ -86,11 +139,16 @@ namespace TrollBridge {
 			}
 			// Turn the Json to Currency_Data.
 			Currency_Data data = JsonUtility.FromJson<Currency_Data> (currencyJson);
-			// Load the values of the players currency.
-			for (int i = 0; i < currency.Length; i++) {
-				currency [i].currencyName = data.currencyName [i];
-				currency [i].currencyAmount = data.currencyAmount [i];
+			// Load the values of the players currency/reputation.
+			int count = Mathf.Min(currency.Length, Mathf.Min(data.currencyName.Length, data.currencyAmount.Length));
+			for (int i = 0; i < count; i++)
+			{
+				currency[i].currencyName = data.currencyName[i];
+				currency[i].currencyAmount = data.currencyAmount[i];
 			}
+
+            // Make sure a Reputation entry exists for downstream UI even if older saves lacked it
+            EnsureCurrencyExists(ReputationCurrencyName);
 		}
 	}
 

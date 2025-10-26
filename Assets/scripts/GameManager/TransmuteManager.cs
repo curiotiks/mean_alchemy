@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using System.IO;
 using System;
@@ -32,6 +31,27 @@ public sealed class TransmuteManager : MonoBehaviour
     /// (e.g., a Supabase sender) can subscribe to mirror the write to a server.
     /// </summary>
     public static event Action<FamiliarItem> OnTransmuted;
+
+    [Header("Confirmed Stats (read-only at runtime)")]
+    [Tooltip("Last confirmed mean from the most recent successful transmutation.")]
+    [SerializeField] private float confirmedMean = 0f;
+
+    [Tooltip("Last confirmed standard deviation from the most recent successful transmutation.")]
+    [SerializeField] private float confirmedSD = 0f;
+
+    /// <summary>Public read-only accessors for HUDs/other systems.</summary>
+    public float ConfirmedMean => confirmedMean;
+    public float ConfirmedSD   => confirmedSD;
+
+    /// <summary>Event fired whenever the confirmed stats are updated.</summary>
+    public static event Action<float, float> OnConfirmedStatsChanged;
+
+    /// <summary>Helper to fetch the latest confirmed stats in one call.</summary>
+    public void GetConfirmedStats(out float mean, out float sd)
+    {
+        mean = confirmedMean;
+        sd = confirmedSD;
+    }
 
     private void Awake()
     {
@@ -93,6 +113,10 @@ public sealed class TransmuteManager : MonoBehaviour
             Debug.Log($"Saved FamiliarItem to {filePath}");
 #endif
             OnTransmuted?.Invoke(TempFamiliarItem);
+            // Cache confirmed stats for HUD/other systems
+            confirmedMean = TempFamiliarItem.mean;
+            confirmedSD   = TempFamiliarItem.sd;
+            OnConfirmedStatsChanged?.Invoke(confirmedMean, confirmedSD);
             // Also send to server via GameLogger if present
             var logger = FindObjectOfType<GameLogger>();
             if (logger != null)
@@ -164,6 +188,13 @@ public sealed class TransmuteManager : MonoBehaviour
     public static void ClearPoweredFamiliar()
     {
         FamiliarState.SetPowered(false);
+        // Clear cached confirmed stats when familiar is cleared
+        if (Instance != null)
+        {
+            Instance.confirmedMean = 0f;
+            Instance.confirmedSD   = 0f;
+            OnConfirmedStatsChanged?.Invoke(0f, 0f);
+        }
         WarpGate.RefreshAllGates();
 #if UNITY_EDITOR
         Debug.Log("[TransmuteManager] Familiar cleared -> gates refreshed (FamiliarState)");

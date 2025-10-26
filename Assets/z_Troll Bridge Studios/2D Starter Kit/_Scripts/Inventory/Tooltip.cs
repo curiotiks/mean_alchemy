@@ -10,18 +10,18 @@ namespace TrollBridge {
 		private string data;
 		public GameObject tooltip;
 
-		void Start()
-		{
-			tooltip.SetActive (false);
-		}
+		// void Start()
+		// {
+		// 	tooltip.SetActive (false);
+		// }
 
-		void Update()
-		{
-			if(tooltip.activeInHierarchy)
-			{
-				tooltip.transform.position = Input.mousePosition;
-			}
-		}
+		// void Update()
+		// {
+		// 	if(tooltip.activeInHierarchy)
+		// 	{
+		// 		tooltip.transform.position = Input.mousePosition;
+		// 	}
+		// }
 
 		public void Activate(Item item)
 		{
@@ -81,7 +81,7 @@ namespace TrollBridge {
 			}
 			// Display the item description.
 			data = string.Concat (data,"\n" + item.Description);
-			tooltip.transform.GetChild(0).GetComponent<Text>().text = data;
+			// tooltip.transform.GetChild(0).GetComponent<Text>().text = data;
 		}
 	}
 }
