@@ -13,15 +13,12 @@ Your task is to transmute elemental stones, construct your **Familiar**, and tak
 The world of Mean Alchemy isn’t just fantasy—it’s a metaphor for data-driven thinking.  
 Each decision, combination, and battle reflects how understanding variation and central tendency can empower informed action in uncertain environments.
 
-—
-
 ## 🕹️ How to Play
 
 ### 🎯 Goal
 - Collect and complete **bounties** to rise through the ranks of the Alchemist Guild.
 - Transmute stones at the **Alchemy Table** to build your Familiar.
 - Engage in **combat encounters** using your Familiar’s abilities, which depend on your statistical understanding of data.
-
 
 ### 🧭 Locations
 
@@ -76,7 +73,6 @@ A turn-based battle space where your Familiar faces off against a bounty opponen
 ## 🌐 Play Online
 
 👉 [**Play Mean Alchemy on Itch.io**](https://curtiks.itch.io/mean-alchemy)  
-*(Best experienced in full-screen mode on desktop browsers.)*
 
 Current test code: test001
 
