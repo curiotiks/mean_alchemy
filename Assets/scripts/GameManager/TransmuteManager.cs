@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 using System.IO;
 using System;
 
@@ -53,6 +55,56 @@ public sealed class TransmuteManager : MonoBehaviour
         sd = confirmedSD;
     }
 
+    [Header("Transmute Requirements (UI)")]
+    [Tooltip("Minimum stones required in the current mix before Transmute is allowed.")]
+    [SerializeField] private int minStonesRequired = 20;
+    [Tooltip("Button that triggers Transmute (Confirm). Will be disabled until requirement met).")]
+    [SerializeField] private Button transmuteButton;
+    [Tooltip("Label shown when requirement is not met, e.g., 'Need at least 20 stones.'")]
+    [SerializeField] private TMP_Text requirementText;
+    [Tooltip("How often (seconds) to check the table and update the UI.")]
+    [SerializeField] private float uiCheckInterval = 0.2f;
+
+    private float _nextUiCheckTime = 0f;
+    private bool  _lastOkState = false;
+
+    private int CurrentStoneCount()
+    {
+        var table = Table_Control_Panel.instance;
+        if (table != null && table.numbers_list != null)
+            return table.numbers_list.Count;
+        return 0;
+    }
+
+    private bool HasEnoughStones()
+    {
+        return CurrentStoneCount() >= minStonesRequired;
+    }
+
+    private void UpdateTransmuteAvailability()
+    {
+        bool ok = HasEnoughStones();
+        if (ok != _lastOkState)
+        {
+            _lastOkState = ok;
+            if (transmuteButton != null)
+                transmuteButton.interactable = ok;
+        }
+
+        if (requirementText != null)
+        {
+            if (!ok)
+            {
+                requirementText.text = $"Need at least {minStonesRequired} stones.";
+                if (!requirementText.gameObject.activeSelf) requirementText.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (requirementText.gameObject.activeSelf) requirementText.gameObject.SetActive(false);
+            }
+        }
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -64,6 +116,19 @@ public sealed class TransmuteManager : MonoBehaviour
 
         var baseName = string.IsNullOrWhiteSpace(fileName) ? "FamiliarItemsData_LOCAL" : fileName.Trim();
         filePath = Path.Combine(Application.persistentDataPath, $"{baseName}.json");
+
+        _lastOkState = !HasEnoughStones(); // force first refresh to run path
+        UpdateTransmuteAvailability();
+        _nextUiCheckTime = Time.time + uiCheckInterval;
+    }
+
+    private void Update()
+    {
+        if (Time.time >= _nextUiCheckTime)
+        {
+            _nextUiCheckTime = Time.time + uiCheckInterval;
+            UpdateTransmuteAvailability();
+        }
     }
 
     /// <summary>
@@ -98,6 +163,16 @@ public sealed class TransmuteManager : MonoBehaviour
     /// </summary>
     public void TransmuteAddNew()
     {
+        // Minimum requirement guard for WebGL/classroom use
+        if (!HasEnoughStones())
+        {
+#if UNITY_EDITOR
+            Debug.LogWarning($"Transmute blocked: need at least {minStonesRequired} stones (have {CurrentStoneCount()}).");
+#endif
+            UpdateTransmuteAvailability();
+            return;
+        }
+
         if (TempFamiliarItem == null)
         {
 #if UNITY_EDITOR
