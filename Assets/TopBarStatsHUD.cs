@@ -1,8 +1,8 @@
 using UnityEngine;
 using TMPro;
-using TrollBridge;
 using System;
 using System.Reflection;
+using System.Linq;
 
 public class TopBarStatsHUD : MonoBehaviour
 {
@@ -27,7 +27,10 @@ public class TopBarStatsHUD : MonoBehaviour
     [SerializeField] private string[] meanNames = { "ConfirmedMean", "Mean", "currentMean", "mean" };
     [SerializeField] private string[] sdNames   = { "ConfirmedSD", "SD", "currentSD", "sd", "StdDev", "stdDev" };
 
-    private Money money;
+    // Reputation source (Wallet or legacy Money)
+    private Component repSource;
+    private MemberInfo cachedRepMember;
+    [SerializeField] private string[] repNames = { "Reputation", "Balance", "Amount", "Coins", "Value" };
 
     // Cached auto-detected stats source + members
     private MonoBehaviour statsSource;
@@ -176,9 +179,8 @@ public class TopBarStatsHUD : MonoBehaviour
         if (cachedTransmuteManager == null)
             TryBindTransmuteManager();
 
-        // Reputation
-        if (money == null) money = FindObjectOfType<Money>();
-        int rep = (money != null) ? money.Reputation : 0;
+        // Reputation (supports Wallet or legacy Money via reflection)
+        int rep = GetReputation();
         if (debugLogs && reputationText != null) Debug.Log($"[TopBarStatsHUD] Rep={rep}");
         if (reputationText != null && rep != lastRep)
         {
@@ -217,6 +219,69 @@ public class TopBarStatsHUD : MonoBehaviour
                 sdText.text = $"{sdPrefix}—";
             }
         }
+    }
+
+    private int GetReputation()
+    {
+        // Find and cache a Wallet (preferred) or legacy Money component
+        if (repSource == null)
+        {
+            var walletType = FindTypeByName("Wallet");
+            if (walletType != null)
+                repSource = (Component)FindObjectOfType(walletType);
+
+            if (repSource == null)
+            {
+                var moneyType = FindTypeByName("Money");
+                if (moneyType != null)
+                    repSource = (Component)FindObjectOfType(moneyType);
+            }
+            cachedRepMember = null; // force re-resolve on first use
+        }
+
+        if (repSource == null) return 0;
+
+        // Resolve (and cache) a member that looks like the reputation amount
+        if (cachedRepMember == null)
+            cachedRepMember = ResolveMember(repSource.GetType(), repNames, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+        if (ReadInt(repSource, cachedRepMember, out var val))
+            return val;
+
+        return 0;
+    }
+
+    private static Type FindTypeByName(string name)
+    {
+        var t = Type.GetType(name);
+        if (t != null) return t;
+        try
+        {
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .FirstOrDefault(x => x.Name == name);
+        }
+        catch { return null; }
+    }
+
+    private static bool ReadInt(object src, MemberInfo member, out int value)
+    {
+        value = 0;
+        if (member == null || src == null) return false;
+        object v = null;
+        if (member is PropertyInfo pi)
+        {
+            try { v = pi.GetValue(src, null); } catch { return false; }
+        }
+        else if (member is FieldInfo fi)
+        {
+            try { v = fi.GetValue(src); } catch { return false; }
+        }
+        if (v == null) return false;
+        if (v is int vi) { value = vi; return true; }
+        if (v is float vf) { value = Mathf.RoundToInt(vf); return true; }
+        if (int.TryParse(v.ToString(), out value)) return true;
+        return false;
     }
 
     private bool TryGetStats(out float mean, out float sd)

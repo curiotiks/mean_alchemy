@@ -5,10 +5,9 @@
       "imagePath": "Sprites/familiar/Mon_014_c_front",
       "mean": 12.5,
       "sd": 3.2,
-      "difficulty" : "Easy",
+      "difficulty": "Easy",
       "rewardList": [
-        { "type": 0, "amount": 500 },
-        { "type": 1, "amount": 200 }
+        { "type": 0, "amount": 1 }
       ]
     },
     {
@@ -16,22 +15,19 @@
       "imagePath": "Sprites/familiar/Mon_001_a_front",
       "mean": 8.0,
       "sd": 1.5,
-      "difficulty" : "Easy",
+      "difficulty": "Easy",
       "rewardList": [
-        { "type": 0, "amount": 250 },
-        { "type": 2, "amount": 30 }
+        { "type": 0, "amount": 1 }
       ]
     },
     {
-      "name": "Lost Relic" ,
+      "name": "Lost Relic",
       "imagePath": "Sprites/familiar/Mon_002_a_front",
       "mean": 15.0,
       "sd": 4.0,
-      "difficulty" : "Easy",
+      "difficulty": "Easy",
       "rewardList": [
-        { "type": 0, "amount": 800 },
-        { "type": 1, "amount": 400 },
-        { "type": 2, "amount": 50 }
+        { "type": 0, "amount": 1 }
       ]
     },
     {
@@ -39,9 +35,9 @@
       "imagePath": "Sprites/familiar/Mon_003_b_front",
       "mean": 5.5,
       "sd": 1.0,
-      "difficulty" : "Easy",
+      "difficulty": "Easy",
       "rewardList": [
-        { "type": 0, "amount": 150 }
+        { "type": 0, "amount": 1 }
       ]
     },
     {
@@ -49,10 +45,9 @@
       "imagePath": "Sprites/familiar/Mon_005_a_front",
       "mean": 20.0,
       "sd": 5.0,
-      "difficulty" : "Medium",
+      "difficulty": "Medium",
       "rewardList": [
-        { "type": 1, "amount": 600 },
-        { "type": 2, "amount": 80 }
+        { "type": 0, "amount": 10 }
       ]
     },
     {
@@ -60,10 +55,9 @@
       "imagePath": "Sprites/familiar/Mon_006_a_front",
       "mean": 7.0,
       "sd": 1.8,
-      "difficulty" : "Medium",
+      "difficulty": "Medium",
       "rewardList": [
-        { "type": 0, "amount": 180 },
-        { "type": 1, "amount": 90 }
+        { "type": 0, "amount": 10 }
       ]
     },
     {
@@ -71,9 +65,9 @@
       "imagePath": "Sprites/familiar/Mon_009_a_front",
       "mean": 18.0,
       "sd": 4.5,
-      "difficulty" : "Medium",
+      "difficulty": "Medium",
       "rewardList": [
-        { "type": 2, "amount": 70 }
+        { "type": 0, "amount": 10 }
       ]
     },
     {
@@ -81,9 +75,9 @@
       "imagePath": "Sprites/familiar/Mon_010_b_front",
       "mean": 10.0,
       "sd": 2.0,
-      "difficulty" : "Hard",
+      "difficulty": "Hard",
       "rewardList": [
-        { "type": 0, "amount": 1000 }
+        { "type": 0, "amount": 100 }
       ]
     },
     {
@@ -91,11 +85,9 @@
       "imagePath": "Sprites/familiar/Mon_011_b_front",
       "mean": 25.0,
       "sd": 6.0,
-      "difficulty" : "Hard",
+      "difficulty": "Hard",
       "rewardList": [
-        { "type": 0, "amount": 1500 },
-        { "type": 1, "amount": 800 },
-        { "type": 2, "amount": 100 }
+        { "type": 0, "amount": 100 }
       ]
     },
     {
@@ -103,11 +95,9 @@
       "imagePath": "Sprites/familiar/Mon_012_a_front",
       "mean": 25.0,
       "sd": 6.0,
-      "difficulty" : "Hard",
+      "difficulty": "Hard",
       "rewardList": [
-        { "type": 0, "amount": 1500 },
-        { "type": 1, "amount": 800 },
-        { "type": 2, "amount": 100 }
+        { "type": 0, "amount": 100 }
       ]
     },
     {
@@ -115,11 +105,9 @@
       "imagePath": "Sprites/familiar/Mon_013_a_front",
       "mean": 30.0,
       "sd": 7.0,
-      "difficulty" : "Hard",
+      "difficulty": "Hard",
       "rewardList": [
-        { "type": 0, "amount": 2000 },
-        { "type": 1, "amount": 1000 },
-        { "type": 2, "amount": 150 }
+        { "type": 0, "amount": 100 }
       ]
     }
   ]

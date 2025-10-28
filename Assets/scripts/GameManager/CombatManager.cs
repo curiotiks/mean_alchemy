@@ -7,6 +7,7 @@ using TMPro;
 using DG.Tweening;
 using BountyItemData;
 using UnityEngine.SceneManagement;
+using MeanAlchemy;
 
 public class CombatManager : MonoBehaviour
 {
@@ -385,6 +386,50 @@ public class CombatManager : MonoBehaviour
         return Random.Range(bountyItem.mean - bountyItem.sd, bountyItem.mean + bountyItem.sd)/10;
     }
 
+    /// <summary>
+    /// Awards reputation based on the current bounty difficulty.
+    /// Easy = 1, Medium = 10, Hard = 100. No-op if Wallet is missing.
+    /// </summary>
+    private void AwardReputationForCurrentBounty()
+    {
+        int rep = 1;
+        string diff = string.Empty;
+        try 
+        {
+            if (bountyItem_info != null)
+                diff = bountyItem_info.difficulty ?? string.Empty;
+
+            if (diff.Equals("Medium", System.StringComparison.OrdinalIgnoreCase)) rep = 10;
+            else if (diff.Equals("Hard", System.StringComparison.OrdinalIgnoreCase)) rep = 100;
+            else rep = 1; // Easy or unknown
+        }
+        catch { rep = 1; }
+
+        try
+        {
+            if (Wallet.Instance != null)
+            {
+                int before = 0;
+                try { before = Wallet.Instance.Reputation; } catch {}
+
+                Wallet.Instance.Add(rep);
+
+                int after = 0;
+                try { after = Wallet.Instance.Reputation; } catch {}
+
+                Debug.Log($"[CombatManager] Awarded +{rep} reputation for difficulty '{(string.IsNullOrEmpty(diff)?"Easy/Unknown":diff)}'. Before={before}, After={after}");
+            }
+            else
+            {
+                Debug.LogWarning($"[CombatManager] Wallet not present; could not award +{rep} reputation.");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[CombatManager] Failed to award reputation: {ex.Message}");
+        }
+    }
+
     private void FinishAndSend(string outcome)
     {
         if (_battleEnded) return; // prevent double send
@@ -423,6 +468,11 @@ public class CombatManager : MonoBehaviour
         if (logger == null)
         {
             Debug.LogWarning("GameLogger not present; battle report not sent. Loading next scene anyway.");
+            if (outcome == "win")
+            {
+                AwardReputationForCurrentBounty();
+                CompleteBountySelection();
+            }
             ClearFamiliarAndRelockWarp();
             SafeLoadNextScene();
             return;
@@ -453,21 +503,82 @@ public class CombatManager : MonoBehaviour
                 logger.LogBattleTurnsBulk(eventId, rows,
                     onSuccess: () => {
                         Debug.Log($"Battle report sent with {rows.Count} turns. Id=" + eventId);
+                        if (outcome == "win")
+                        {
+                            AwardReputationForCurrentBounty();
+                            CompleteBountySelection();
+                        }
                         ClearFamiliarAndRelockWarp();
                         SafeLoadNextScene();
                     },
                     onError: (err) => {
                         Debug.LogError("Battle turns insert failed: " + err);
+                        if (outcome == "win")
+                        {
+                            AwardReputationForCurrentBounty();
+                            CompleteBountySelection();
+                        }
                         ClearFamiliarAndRelockWarp();
                         SafeLoadNextScene();
                     });
             },
             onError: (err) => {
                 Debug.LogError("Battle summary insert failed: " + err);
+                if (outcome == "win")
+                {
+                    AwardReputationForCurrentBounty();
+                    CompleteBountySelection();
+                }
                 ClearFamiliarAndRelockWarp();
                 SafeLoadNextScene();
             }
         );
+    }
+
+    /// <summary>
+    /// Clears the current bounty selection after a win.
+    /// </summary>
+    private void CompleteBountySelection()
+    {
+        // Try to get BountyBoardManager (instance or via FindObjectOfType)
+        var bbm = (BountyBoardManager.instance != null) ? BountyBoardManager.instance : GameObject.FindObjectOfType<BountyBoardManager>();
+        if (bbm != null)
+        {
+            var cur = bbm.GetType().GetField("currentBounty");
+            if (cur != null)
+            {
+                var val = cur.GetValue(bbm);
+                if (val != null)
+                {
+                    string bountyName = "?";
+                    string bountyDiff = "?";
+                    try
+                    {
+                        var bountyItemField = val.GetType().GetField("bountyItem");
+                        object bountyItemObj = bountyItemField != null ? bountyItemField.GetValue(val) : null;
+                        if (bountyItemObj != null)
+                        {
+                            var nameField = bountyItemObj.GetType().GetField("name");
+                            var diffField = bountyItemObj.GetType().GetField("difficulty");
+                            if (nameField != null)
+                                bountyName = System.Convert.ToString(nameField.GetValue(bountyItemObj));
+                            if (diffField != null)
+                                bountyDiff = System.Convert.ToString(diffField.GetValue(bountyItemObj));
+                        }
+                    }
+                    catch {}
+                    Debug.Log($"[CombatManager] Clearing current bounty selection: {bountyName} (difficulty: {bountyDiff})");
+                    cur.SetValue(bbm, null);
+                }
+            }
+            // Attempt to refresh UI (if method exists)
+            try
+            {
+                var m = bbm.GetType().GetMethod("RefreshSelectedCardBanner", System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.NonPublic);
+                if (m != null) m.Invoke(bbm, null);
+            }
+            catch {}
+        }
     }
 
     /// <summary>

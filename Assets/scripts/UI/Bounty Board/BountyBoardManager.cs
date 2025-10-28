@@ -7,6 +7,7 @@ using System;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using MeanAlchemy;
 
 public class BountyBoardManager : MonoBehaviour
 {
@@ -544,6 +545,71 @@ public class BountyBoardManager : MonoBehaviour
         }
 
         InitializeCards();
+    }
+
+    /// <summary>
+    /// Computes a reputation award based on the bounty item's difficulty.
+    /// Easy = 1, Medium = 10, Hard = 100. Falls back to 1 on unknown values.
+    /// </summary>
+    public static int ComputeReputationFor(BountyItem item)
+    {
+        if (item == null) return 1;
+        string diff = item.difficulty ?? string.Empty;
+        if (diff.Equals("Medium", StringComparison.OrdinalIgnoreCase)) return 10;
+        if (diff.Equals("Hard",   StringComparison.OrdinalIgnoreCase)) return 100;
+        return 1; // Easy or unknown
+    }
+
+    /// <summary>
+    /// Safely completes the currently selected bounty (if any), awards reputation,
+    /// clears the selection, and refreshes warp gates. This is null-safe and can
+    /// be called from any scene as long as the manager instance exists.
+    /// </summary>
+    public void CompleteCurrentBountyAndAward()
+    {
+        var bi = currentBounty?.bountyItem;
+        if (bi == null)
+        {
+#if UNITY_EDITOR
+            Debug.Log("[BountyBoardManager] No current bounty to complete.");
+#endif
+            return;
+        }
+
+        int rep = ComputeReputationFor(bi);
+
+        // Try to apply reputation via the player's Wallet component.
+        try
+        {
+            var wallet = Wallet.Instance ?? UnityEngine.Object.FindObjectOfType<Wallet>();
+            if (wallet != null)
+            {
+                wallet.Add(rep);
+            }
+            else
+            {
+                Debug.LogWarning($"[BountyBoardManager] Wallet component not found; could not apply +{rep} reputation.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[BountyBoardManager] Failed to apply reputation (+{rep}): {ex.Message}");
+        }
+
+        // Log completion (best-effort)
+        try
+        {
+            GameLogger.Instance?.LogEvent("bounty_completed", $"key={bi.name};rep={rep}");
+        }
+        catch { /* ignore logging failures */ }
+
+        // Clear and refresh gates/UI
+        try
+        {
+            ClearCurrentBounty(log: false);
+            WarpGate.RefreshAllGates();
+        }
+        catch { /* ignore */ }
     }
 
     private void OnDestroy()

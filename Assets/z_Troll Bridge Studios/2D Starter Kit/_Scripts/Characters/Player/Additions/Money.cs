@@ -46,10 +46,31 @@ namespace TrollBridge {
         }
 
         /// <summary>
+        /// Compatibility shim: treat generic Add(int) as adding Reputation.
+        /// This lets external systems award reputation without depending on
+        /// TrollBridge-specific APIs or namespaces.
+        /// </summary>
+        public void Add(int amount)
+        {
+            AddReputation(amount);
+        }
+
+        /// <summary>
+        /// Compatibility shim: explicit getter for reputation as an int method.
+        /// </summary>
+        public int GetReputation()
+        {
+            return Reputation;
+        }
+
+        /// <summary>
         /// Ensures a currency with the provided name exists; if not, appends it with amount 0.
         /// </summary>
         private void EnsureCurrencyExists(string name)
         {
+            if (currency == null)
+                currency = new Currency[0];
+
             for (int i = 0; i < currency.Length; i++)
             {
                 if (currency[i].currencyName == name)
@@ -62,6 +83,8 @@ namespace TrollBridge {
         }
 
 		void Awake(){
+            if (currency == null)
+                currency = new Currency[0];
 			Load ();
 		}
 
@@ -88,6 +111,8 @@ namespace TrollBridge {
 		/// <param name="currencyName">Currency name.</param>
 		/// <param name="amount">Amount.</param>
 		public void AddSubtractMoney(string currencyName, int amount){
+            if (currency == null)
+                currency = new Currency[0];
 			// Loop through all the currenies.
 			for(int i = 0; i < currency.Length; i++){
 				// IF we find the currency we are looking for.
@@ -105,6 +130,8 @@ namespace TrollBridge {
 		/// </summary>
 		public void Save()
 		{
+            if (currency == null)
+                currency = new Currency[0];
 			// Create a new Currency_Data.
 			Currency_Data data = new Currency_Data ();
 			// Setup the data to be saved.
@@ -137,6 +164,8 @@ namespace TrollBridge {
 				// We leave as there is nothing to load.
 				return;
 			}
+            if (currency == null)
+                currency = new Currency[0];
 			// Turn the Json to Currency_Data.
 			Currency_Data data = JsonUtility.FromJson<Currency_Data> (currencyJson);
 			// Load the values of the players currency/reputation.

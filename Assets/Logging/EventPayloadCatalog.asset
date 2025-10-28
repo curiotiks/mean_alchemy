@@ -198,6 +198,10 @@ MonoBehaviour:
       target: report_summary
       description: Full battle report with summary + turn-by-turn details. Data is
         built in CombatManager.
+    - key: bounty_completed
+      action: completed
+      target: bounty_completed
+      description: 'The player has completed a bounty. '
   - name: Bounty Board
     entries:
     - key: view_card
