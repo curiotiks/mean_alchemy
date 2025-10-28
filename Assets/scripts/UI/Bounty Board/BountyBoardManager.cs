@@ -47,6 +47,9 @@ public class BountyBoardManager : MonoBehaviour
     [SerializeField] GameObject CardHolderParent;
     [SerializeField] GameObject selectedCardPanel;
     [SerializeField] GameObject CardsPrefab;
+    [SerializeField] private GameObject blackout; // BG Image under Selected Card Panel
+    [SerializeField] private string blackoutChildName = "BG Image"; // name of blackout under selectedCardPanel
+    private bool overlayShown = false;
 
     [Header("ON GOING BOUNTY")]
     public BountyCard currentBounty = null;
@@ -73,21 +76,37 @@ public class BountyBoardManager : MonoBehaviour
 
     private void Start()
     {
-        // Initialize the cards holder panels
-        SceneManager.sceneLoaded += OnSceneLoaded;
         CardHolderParent = GameObject.FindGameObjectWithTag(TAG_CARD_HOLDER_PARENT);
-        cardsHolderPanels = CardHolderParent.GetComponentsInChildren<CardsHolderPanel>().ToList();
-        foreach (CardsHolderPanel panel in cardsHolderPanels)
+        if (CardHolderParent)
         {
-            panel.ClearTheCards();
+            cardsHolderPanels = CardHolderParent.GetComponentsInChildren<CardsHolderPanel>().ToList();
+            foreach (var panel in cardsHolderPanels) panel.ClearTheCards();
         }
-        // Required: assign the card prefab in Inspector
         if (CardsPrefab == null)
         {
             Debug.LogError("CardsPrefab is not assigned in the inspector.");
         }
+    }
 
-        //InitializeCards();
+    /// <summary>
+    /// Rebinds scene references and rebuilds UI for the *current* scene.
+    /// </summary>
+    private void RebindAndBuildForActiveScene()
+    {
+        var active = SceneManager.GetActiveScene();
+        OnSceneLoaded(active, LoadSceneMode.Single);
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        // When returning to this object that persists across scenes, immediately sync to the current scene
+        RebindAndBuildForActiveScene();
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     /// <summary>
@@ -123,6 +142,19 @@ public class BountyBoardManager : MonoBehaviour
                         tempCard.GetComponent<BountyCard>().setCardInfo(bounty);
                         panel.AddCardsToThisRow(new List<GameObject> { tempCard });
                         cardCount++;
+                        // If the spawned card has a Button on its root, clicking it should show the modal blackout
+                        var btn = tempCard.GetComponent<UnityEngine.UI.Button>();
+                        if (btn != null)
+                        {
+                            btn.onClick.AddListener(ShowBlackout);
+                        }
+                        else
+                        {
+                            // try to find a common child button called "View" or "Open" if present
+                            var view = tempCard.transform.Find("View")?.GetComponent<UnityEngine.UI.Button>()
+                                       ?? tempCard.transform.Find("Open")?.GetComponent<UnityEngine.UI.Button>();
+                            if (view != null) view.onClick.AddListener(ShowBlackout);
+                        }
                     }
                 }
                 cardCount = 0;
@@ -134,6 +166,73 @@ public class BountyBoardManager : MonoBehaviour
             Debug.Log("NO changes in UI but Data Recieved");
         }
 
+    }
+
+    private void ResolveBlackout()
+    {
+        if (blackout == null)
+        {
+            if (selectedCardPanel != null)
+            {
+                var bg = selectedCardPanel.transform.Find(blackoutChildName);
+                if (bg != null) blackout = bg.gameObject;
+            }
+            if (blackout == null)
+            {
+                var bgByName = GameObject.Find(blackoutChildName);
+                if (bgByName != null) blackout = bgByName;
+            }
+        }
+    }
+
+    private void ShowBlackout()
+    {
+        ResolveBlackout();
+        if (blackout != null && !blackout.activeSelf)
+            blackout.SetActive(true);
+    }
+
+    private void HideBlackout()
+    {
+        ResolveBlackout();
+        if (blackout != null && blackout.activeSelf)
+            blackout.SetActive(false);
+    }
+
+    private bool AnyModalContentActive()
+    {
+        if (selectedCardPanel == null) return false;
+        for (int i = 0; i < selectedCardPanel.transform.childCount; i++)
+        {
+            var child = selectedCardPanel.transform.GetChild(i).gameObject;
+            if (child == null) continue;
+            if (blackout != null && child == blackout) continue; // skip the BG Image itself
+            if (child.activeInHierarchy) return true; // any visible modal content
+        }
+        return false;
+    }
+
+    private void EnsureOverlaySync()
+    {
+        if (SceneManager.GetActiveScene().name != "BountyBoard") return;
+        ResolveBlackout();
+        bool shouldShow = AnyModalContentActive();
+        if (shouldShow && !overlayShown)
+        {
+            ShowBlackout();
+            overlayShown = true;
+        }
+        else if (!shouldShow && overlayShown)
+        {
+            HideBlackout();
+            overlayShown = false;
+        }
+    }
+
+    private void Update()
+    {
+        // Poll lightly each frame; cost is negligible (handful of children)
+        EnsureOverlaySync();
     }
 
     #region JSON operations
@@ -309,13 +408,56 @@ public class BountyBoardManager : MonoBehaviour
 
     /// <summary>
     /// SceneLoaded callback: rebinds panel references, restores the selected bounty into non-board scenes,
-    /// then (re)initializes the board and unsubscribes itself.
+    /// then (re)initializes the board.
     /// </summary>
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // Debug.LogWarning("Scene : " + SceneManager.GetActiveScene().name);
         CardHolderParent = GameObject.FindGameObjectWithTag(TAG_CARD_HOLDER_PARENT);
         selectedCardPanel = GameObject.FindGameObjectWithTag(TAG_SELECTED_CARD_HOLDER);
+        Debug.Log($"[BountyBoard] SceneLoaded start → CardHolderParent={(CardHolderParent != null)}, selectedCardPanel={(selectedCardPanel != null)}, panelActive={(selectedCardPanel ? selectedCardPanel.activeSelf : false)}");
+
+        // Ensure the Selected Card Panel parent is active when entering the BountyBoard scene,
+        // so tag lookups continue to work and the modal UI can be shown.
+        if (scene.name == "BountyBoard" && selectedCardPanel != null)
+        {
+            if (!selectedCardPanel.activeSelf)
+            {
+                Debug.LogWarning("[BountyBoard] SelectedCardPanel was inactive at load; forcing active.");
+                selectedCardPanel.SetActive(true);
+            }
+        }
+
+        // Make sure the blackout child ("BG Image") starts hidden in the BountyBoard scene.
+        if (scene.name == "BountyBoard")
+        {
+            var bgObj = GameObject.Find("BG Image");
+            if (bgObj != null && bgObj.activeSelf)
+                bgObj.SetActive(false);
+        }
+
+        Debug.Log($"[BountyBoard] selectedCardPanel active = {(selectedCardPanel != null && selectedCardPanel.activeSelf)}, scene = {scene.name}");
+
+        // If this scene has a full-screen blackout image (used by popups/menus), force it off on entry
+        ResolveBlackout();
+        HideBlackout();
+        overlayShown = false;
+
+        if (scene.name == "BountyBoard" && selectedCardPanel != null)
+        {
+            // Keep parent active for tag lookups; hide its visual children until a card is opened
+            for (int i = 0; i < selectedCardPanel.transform.childCount; i++)
+            {
+                var child = selectedCardPanel.transform.GetChild(i).gameObject;
+                if (child != null && child.name != "BG Image")
+                {
+                    child.SetActive(false);
+                }
+            }
+        }
+
+        // ensure blackout reference is set for this scene
+        ResolveBlackout();
 
         if (selectedCardPanel != null && currentBounty != null && SceneManager.GetActiveScene().name != "BountyBoard")
         {
@@ -372,6 +514,7 @@ public class BountyBoardManager : MonoBehaviour
                 // Hide the badge panel in the Lab and destroy this instantiated card
                 if (selectedCardPanel) selectedCardPanel.SetActive(false);
                 if (instantiatedCard) Destroy(instantiatedCard);
+                HideBlackout();
             });
         }
 
@@ -390,15 +533,17 @@ public class BountyBoardManager : MonoBehaviour
                 return;
             }
         }
-
         else
         {
             Debug.LogWarning("CardHolderParent not found in the scene.");
         }
 
+        if (CardHolderParent == null || CardsPrefab == null)
+        {
+            return; // nothing to build in this scene
+        }
+
         InitializeCards();
-        //InitializeCards();
-        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnDestroy()

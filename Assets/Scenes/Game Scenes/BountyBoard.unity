@@ -163,6 +163,8 @@ MonoBehaviour:
   selectedCardPanel: {fileID: 0}
   CardsPrefab: {fileID: 8956884507726659980, guid: 976ae573ad988a04fbe75a3db751421b,
     type: 3}
+  blackout: {fileID: 1700284799}
+  blackoutChildName: BG Image
   currentBounty: {fileID: 0}
   cardsHolderPanels: []
 --- !u!4 &120971828
@@ -1367,7 +1369,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1700284800
 RectTransform:
   m_ObjectHideFlags: 0
