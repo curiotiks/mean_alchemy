@@ -212,6 +212,7 @@ public sealed class TransmuteManager : MonoBehaviour
         }
         catch (Exception ex)
         {
+            Debug.LogException(ex);
 #if UNITY_EDITOR
             Debug.LogError($"Failed to save FamiliarItem: {ex}");
 #endif

@@ -5,6 +5,7 @@ using UnityEngine;
 using BountyItemData;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 public class BountyCard : MonoBehaviour
 {
@@ -245,6 +246,8 @@ public class BountyCard : MonoBehaviour
         BountyBoardManager.instance.currentBounty = tempBountyCard.GetComponent<BountyCard>();
 
         LogKey(EV_ACCEPT);
+        // Automatically return to Lab after accepting bounty
+        UnityEngine.SceneManagement.SceneManager.LoadScene(SceneNames.TheLab);
     }
 
     private void HandleAbandonSelection()
