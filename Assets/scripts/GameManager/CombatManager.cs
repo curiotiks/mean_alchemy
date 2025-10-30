@@ -619,6 +619,12 @@ public class CombatManager : MonoBehaviour
         }
         try
         {
+            // Set spawn location when returning to the Lab
+            if (GameManager.instance != null && GameManager.instance.userInfo != null)
+            {
+                GameManager.instance.userInfo.lastSpawnLocation = SpawnLocation.Default;
+                Debug.Log("[CombatManager] Set lastSpawnLocation = FromCombatGate before loading next scene.");
+            }
             SceneManager.LoadSceneAsync(nextSceneName, LoadSceneMode.Single);
         }
         catch (System.Exception ex)
