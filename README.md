@@ -72,7 +72,7 @@ A turn-based battle space where your Familiar faces off against a bounty opponen
 
 ## 🌐 Play Online
 
-👉 [**Play Mean Alchemy on Itch.io**](https://mean-alchemy.netlify.app/)  
+👉 [**Play Mean Alchemy**](https://mean-alchemy.netlify.app/)  
 
 Current test code: test001 or use the one provided to you. 
 
