@@ -222,7 +222,7 @@ public class BountyCard : MonoBehaviour
             LogKey(EV_VIEW);
     }
 
-    private void HandleCloseSelection()
+    private void HandleCloseSelection(bool log = true)
     {
         selectedCardPanel.SetActive(false);
         this.transform.SetParent(cardHolderParent);
@@ -230,12 +230,13 @@ public class BountyCard : MonoBehaviour
         closeButton.gameObject.SetActive(isSelected);
         acceptButton.gameObject.SetActive(isSelected);
         abandonButton.gameObject.SetActive(false);
-        LogKey(EV_CLOSE);
+        if (log)
+            LogKey(EV_CLOSE);
     }
 
     private void HandleCardAcceptance()
     {
-        HandleCloseSelection();
+        HandleCloseSelection(log: false);
         Destroy(BountyBoardManager.instance.currentBounty?.gameObject);
         BountyBoardManager.instance.currentBounty = null;
         GameObject tempBountyCard = Instantiate(this, selectedCardPanel.transform).gameObject;
@@ -252,7 +253,7 @@ public class BountyCard : MonoBehaviour
 
     private void HandleAbandonSelection()
     {
-        HandleCloseSelection();
+        HandleCloseSelection(log: false);
         cardSelectedStatus.enabled = false;
         Destroy(BountyBoardManager.instance.currentBounty.gameObject);
         BountyBoardManager.instance.currentBounty = null;
