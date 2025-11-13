@@ -76,6 +76,8 @@ public class CombatManager : MonoBehaviour
         public float playerSd;
         public float enemyMean;
         public float enemySd;
+        public int playerReputationBefore; // reputation at battle start (or before reward)
+        public int playerReputationAfter;  // reputation after battle outcome and rewards
     }
 
     [System.Serializable]
@@ -462,6 +464,47 @@ public class CombatManager : MonoBehaviour
         }
         _summary.avgClickInterval = (playerTurns > 1) ? (sumIntervals / (float)(playerTurns - 1) / 1000f) : 0f;
 
+        // Capture player reputation before/after awarding any battle rewards.
+        int repBefore = 0;
+        int repAfter = 0;
+        try
+        {
+            if (Wallet.Instance != null)
+            {
+                repBefore = Wallet.Instance.Reputation;
+            }
+        }
+        catch {}
+
+        if (outcome == "win")
+        {
+            // Award reputation exactly once here so the summary reflects the final state.
+            AwardReputationForCurrentBounty();
+            try
+            {
+                if (Wallet.Instance != null)
+                {
+                    repAfter = Wallet.Instance.Reputation;
+                }
+                else
+                {
+                    repAfter = repBefore;
+                }
+            }
+            catch
+            {
+                repAfter = repBefore;
+            }
+        }
+        else
+        {
+            // No reputation change on lose/flee; after == before.
+            repAfter = repBefore;
+        }
+
+        _summary.playerReputationBefore = repBefore;
+        _summary.playerReputationAfter  = repAfter;
+
         // Build payload for game_events.event_data
         var payload = new Dictionary<string, object>
         {
@@ -474,7 +517,6 @@ public class CombatManager : MonoBehaviour
             Debug.LogWarning("GameLogger not present; battle report not sent. Loading next scene anyway.");
             if (outcome == "win")
             {
-                AwardReputationForCurrentBounty();
                 CompleteBountySelection();
             }
             ClearFamiliarAndRelockWarp();
@@ -509,7 +551,6 @@ public class CombatManager : MonoBehaviour
                         Debug.Log($"Battle report sent with {rows.Count} turns. Id=" + eventId);
                         if (outcome == "win")
                         {
-                            AwardReputationForCurrentBounty();
                             CompleteBountySelection();
                         }
                         ClearFamiliarAndRelockWarp();
@@ -519,7 +560,6 @@ public class CombatManager : MonoBehaviour
                         Debug.LogError("Battle turns insert failed: " + err);
                         if (outcome == "win")
                         {
-                            AwardReputationForCurrentBounty();
                             CompleteBountySelection();
                         }
                         ClearFamiliarAndRelockWarp();
@@ -530,7 +570,6 @@ public class CombatManager : MonoBehaviour
                 Debug.LogError("Battle summary insert failed: " + err);
                 if (outcome == "win")
                 {
-                    AwardReputationForCurrentBounty();
                     CompleteBountySelection();
                 }
                 ClearFamiliarAndRelockWarp();
