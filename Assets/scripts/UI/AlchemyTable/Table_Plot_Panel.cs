@@ -253,6 +253,27 @@ public class Table_Plot_Panel : MonoBehaviour
         Debug.Log("Transmute confirmed. Returning to Alchemy Table.");
         Debug.Log(SceneNames.AlchemyTable);
 
+        // Log movement back to the Lab using the EventPayloadCatalog (Location -> lab)
+        if (catalog != null)
+        {
+            var logger = GameLogger.Instance != null 
+                ? GameLogger.Instance 
+                : GameObject.FindObjectOfType<GameLogger>();
+
+            if (logger != null)
+            {
+                logger.LogEvent("Location", "lab", null);
+            }
+            else
+            {
+                Debug.LogWarning("Table_Plot_Panel: GameLogger instance not found; could not log return-to-lab event.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Table_Plot_Panel: EventPayloadCatalog not assigned; cannot log return-to-lab event.");
+        }
+
         SceneManager.LoadScene(SceneNames.TheLab); // Always return to Alchemy Table after transmute
 
     }

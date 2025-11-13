@@ -247,6 +247,12 @@ public class BountyCard : MonoBehaviour
         BountyBoardManager.instance.currentBounty = tempBountyCard.GetComponent<BountyCard>();
 
         LogKey(EV_ACCEPT);
+        // Log movement back to the Lab using the Location category
+        var logger = GameLogger.Instance != null ? GameLogger.Instance : GameObject.FindObjectOfType<GameLogger>();
+        if (logger != null)
+        {
+            logger.LogEvent("Location", "lab", null);
+        }
         // Automatically return to Lab after accepting bounty
         UnityEngine.SceneManagement.SceneManager.LoadScene(SceneNames.TheLab);
     }

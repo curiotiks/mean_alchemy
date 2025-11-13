@@ -102,6 +102,10 @@ public class CombatManager : MonoBehaviour
     [Header("Flow / Navigation")]
     [SerializeField] private string nextSceneName = "TheLab"; // scene to load after battle ends
 
+    [Header("Navigation Logging")]
+    [Tooltip("Location event for returning from combat to the Lab (Location/toLab).")]
+    [SerializeField] private EventRef labWarpEvent;
+
     public CombatManager SetBountyItem(BountyItem bountyItem)
     {
         this.bountyItem_info = bountyItem.deepCopy();
@@ -619,6 +623,26 @@ public class CombatManager : MonoBehaviour
         }
         try
         {
+            // Log movement back to the Lab (Location/toLab) before changing scenes
+            try
+            {
+                var logger = GameLogger.Instance != null ? GameLogger.Instance : GameObject.FindObjectOfType<GameLogger>();
+                if (logger != null)
+                {
+                    // No extra payload needed here; simple location event
+                    logger.LogEventReturnId(
+                        labWarpEvent,
+                        null,
+                        onSuccess: null,
+                        onError: (err) => Debug.LogWarning("[CombatManager] Failed to log Lab warp event: " + err)
+                    );
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning("[CombatManager] Exception while logging Lab warp event: " + ex.Message);
+            }
+
             // Set spawn location when returning to the Lab
             if (GameManager.instance != null && GameManager.instance.userInfo != null)
             {
