@@ -393,37 +393,63 @@ public class CombatManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns the base reputation reward for the current bounty by difficulty.
+    /// Easy / unknown = 1, Medium = 10, Hard = 100.
+    /// </summary>
+    private int GetReputationForCurrentBounty()
+    {
+        int rep = 1;
+        string diff = string.Empty;
+
+        try
+        {
+            if (bountyItem_info != null)
+                diff = bountyItem_info.difficulty ?? string.Empty;
+        }
+        catch
+        {
+            // fall back to default rep = 1
+        }
+
+        if (diff.Equals("Medium", System.StringComparison.OrdinalIgnoreCase)) rep = 10;
+        else if (diff.Equals("Hard", System.StringComparison.OrdinalIgnoreCase)) rep = 100;
+        else rep = 1; // Easy or unknown
+
+        return rep;
+    }
+
+    /// <summary>
     /// Awards reputation based on the current bounty difficulty.
     /// Easy = 1, Medium = 10, Hard = 100. No-op if Wallet is missing.
     /// </summary>
     private void AwardReputationForCurrentBounty()
     {
-        int rep = 1;
         string diff = string.Empty;
-        try 
+        try
         {
             if (bountyItem_info != null)
                 diff = bountyItem_info.difficulty ?? string.Empty;
-
-            if (diff.Equals("Medium", System.StringComparison.OrdinalIgnoreCase)) rep = 10;
-            else if (diff.Equals("Hard", System.StringComparison.OrdinalIgnoreCase)) rep = 100;
-            else rep = 1; // Easy or unknown
         }
-        catch { rep = 1; }
+        catch
+        {
+            diff = string.Empty;
+        }
+
+        int rep = GetReputationForCurrentBounty();
 
         try
         {
             if (Wallet.Instance != null)
             {
                 int before = 0;
-                try { before = Wallet.Instance.Reputation; } catch {}
+                try { before = Wallet.Instance.Reputation; } catch { }
 
                 Wallet.Instance.Add(rep);
 
                 int after = 0;
-                try { after = Wallet.Instance.Reputation; } catch {}
+                try { after = Wallet.Instance.Reputation; } catch { }
 
-                Debug.Log($"[CombatManager] Awarded +{rep} reputation for difficulty '{(string.IsNullOrEmpty(diff)?"Easy/Unknown":diff)}'. Before={before}, After={after}");
+                Debug.Log($"[CombatManager] Awarded +{rep} reputation for difficulty '{(string.IsNullOrEmpty(diff) ? "Easy/Unknown" : diff)}'. Before={before}, After={after}");
             }
             else
             {
@@ -474,7 +500,10 @@ public class CombatManager : MonoBehaviour
                 repBefore = Wallet.Instance.Reputation;
             }
         }
-        catch {}
+        catch
+        {
+            // ignore; leave repBefore = 0
+        }
 
         if (outcome == "win")
         {
@@ -496,9 +525,39 @@ public class CombatManager : MonoBehaviour
                 repAfter = repBefore;
             }
         }
+        else if (outcome == "lose" || outcome == "flee")
+        {
+            // On defeat or flee, subtract half the reputation that would have been earned for this bounty.
+            int baseReward = GetReputationForCurrentBounty();
+            int penalty = Mathf.CeilToInt(baseReward * 0.5f);
+
+            if (penalty > 0 && Wallet.Instance != null)
+            {
+                int beforePenalty = repBefore;
+                try { beforePenalty = Wallet.Instance.Reputation; } catch { }
+
+                Wallet.Instance.Add(-penalty);
+
+                try
+                {
+                    repAfter = Wallet.Instance.Reputation;
+                }
+                catch
+                {
+                    repAfter = beforePenalty;
+                }
+
+                Debug.Log($"[CombatManager] Applied defeat penalty -{penalty} reputation. Before={beforePenalty}, After={repAfter}");
+            }
+            else
+            {
+                // No wallet or zero penalty; no change.
+                repAfter = repBefore;
+            }
+        }
         else
         {
-            // No reputation change on lose/flee; after == before.
+            // No reputation change on flee/other; after == before.
             repAfter = repBefore;
         }
 
