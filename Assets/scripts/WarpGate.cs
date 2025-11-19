@@ -132,38 +132,44 @@ public class WarpGate : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
+        // Re-evaluate gate state at the moment of entry
+        EvaluateGate();
+
 #if UNITY_EDITOR
         Debug.Log($"[WarpGate:{name}] OnTriggerEnter2D by {other.name} -> gateOpen={gateOpen}, hasBounty={lastHasBounty}, hasFamiliar={lastHasFamiliar}");
 #endif
 
+        // If gate is locked: show message only (NO logging)
         if (!gateOpen)
         {
             ShowAlert(blockedMessage);
-            // Optional: log
-            try
-            {
-                GameLogger.Instance?.LogEvent(
-                    "warp_blocked",
-                    $"gate={name},mode={mode},hasBounty={HasBounty()},hasFamiliar={HasFamiliar()}"
-                );
-            }
-            catch {}
             return;
         }
 
-        // Optional: log success
+        // Gate is open → HARD‑CODE correct logging to catalog: Location / toCombat
         try
         {
-            GameLogger.Instance?.LogEvent(
-                "warp_enter",
-                $"gate={name},mode={mode}"
-            );
-        }
-        catch {}
+            var logger = GameLogger.Instance != null
+                ? GameLogger.Instance
+                : GameObject.FindObjectOfType<GameLogger>();
 
-        // Load target (swap to your loading shim if desired)
+            if (logger != null)
+            {
+                logger.LogEvent("Location", "combat");
+            }
+        }
+        catch (System.Exception ex)
+        {
+#if UNITY_EDITOR
+            Debug.LogWarning($"[WarpGate:{name}] Failed to log toCombat: {ex.Message}");
+#endif
+        }
+
+        // Load target scene
         if (!string.IsNullOrEmpty(sceneToLoad))
+        {
             SceneManager.LoadScene(sceneToLoad);
+        }
     }
 
     private void ShowAlert(string msg)
