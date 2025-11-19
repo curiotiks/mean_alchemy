@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Stopwatch = System.Diagnostics.Stopwatch;
@@ -55,6 +56,17 @@ public class CombatManager : MonoBehaviour
     [HideInInspector] public BountyItem bountyItem_info; // set via SetBountyItem or BountyBoardManager
     [HideInInspector] public UserInfo userInfo_temp_for_combat;
     private bool isExecuted = false;
+
+    [Header("Balance Tuning")]
+    [SerializeField] private float baseHpMultiplier = 4f;      // scales both player and enemy HP
+    [SerializeField] private float damageScale = 0.5f;         // scales raw damage so fights last several turns
+    [SerializeField] private float skewPenaltyScale = 1.0f;    // medium penalty per unit of skew magnitude
+
+    private float _playerHp;
+    private float _enemyHp;
+    private float _playerDmgMult = 1f;
+    private float _enemyDmgMult = 1f;
+    private float _playerSkewMagnitude = 0f;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Logging (battle report)
@@ -126,6 +138,50 @@ public class CombatManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Returns per-difficulty multipliers for enemy HP, enemy damage, and player damage.
+    /// </summary>
+    private void GetDifficultyMultipliers(out float enemyHpMult, out float enemyDmgMult, out float playerDmgMult)
+    {
+        enemyHpMult = 1f;
+        enemyDmgMult = 1f;
+        playerDmgMult = 1f;
+
+        string diff = string.Empty;
+        try
+        {
+            if (bountyItem_info != null)
+            {
+                var diffField = bountyItem_info.GetType().GetField("difficulty");
+                if (diffField != null)
+                {
+                    var val = diffField.GetValue(bountyItem_info) as string;
+                    if (!string.IsNullOrEmpty(val))
+                    {
+                        diff = val;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // leave default multipliers
+        }
+
+        if (diff.Equals("Medium", StringComparison.OrdinalIgnoreCase))
+        {
+            enemyHpMult = 1.5f;
+            enemyDmgMult = 1.3f;
+            playerDmgMult = 0.9f;
+        }
+        else if (diff.Equals("Hard", StringComparison.OrdinalIgnoreCase))
+        {
+            enemyHpMult = 2.0f;
+            enemyDmgMult = 1.6f;
+            playerDmgMult = 0.8f;
+        }
+    }
+
     void Start()
     {
         if (attackBtn != null)
@@ -154,8 +210,8 @@ public class CombatManager : MonoBehaviour
                                                 3,
                                                 1000,
                                                 3,
-                                                Random.Range(20, 31),
-                                                Random.Range(-2f, 2f),
+                                                UnityEngine.Random.Range(20, 31),
+                                                UnityEngine.Random.Range(-2f, 2f),
                                                 SpawnLocation.Default); // Default Spawn Location
         // If a bounty is available, load it and re-apply sprites; otherwise keep defaults
         if (BountyBoardManager.instance != null && BountyBoardManager.instance.currentBounty != null)
@@ -171,13 +227,52 @@ public class CombatManager : MonoBehaviour
         Debug.Log(userInfo_temp_for_combat + "userHPbar: " + userHPbar);
         Debug.Log("User Info: " + userInfo_temp_for_combat.mean + " " + userInfo_temp_for_combat.sd);
 
-        userHPbar.maxValue = userInfo_temp_for_combat.mean;
-        userHPbar.value = userInfo_temp_for_combat.mean;
+        // Compute difficulty-based multipliers and scale HP
+        GetDifficultyMultipliers(out float enemyHpMult, out float enemyDmgMult, out float playerDmgMult);
+        _playerDmgMult = playerDmgMult;
+        _enemyDmgMult = enemyDmgMult;
 
-        enemyHPbar.maxValue = bountyItem_info.mean;
-        enemyHPbar.value = bountyItem_info.mean;
-        hpText_user.text = "HP: " + userInfo_temp_for_combat.mean.ToString();
-        hpText_enemy.text = "HP: " + bountyItem_info.mean.ToString();
+        float designPlayerMean = userInfo_temp_for_combat.mean;
+        float designEnemyMean = (bountyItem_info != null ? bountyItem_info.mean : 10f);
+
+        float hpMult = Mathf.Max(1f, baseHpMultiplier);
+        _playerHp = Mathf.Max(1f, designPlayerMean * hpMult);
+        _enemyHp = Mathf.Max(1f, designEnemyMean * enemyHpMult * hpMult);
+
+        userHPbar.maxValue = _playerHp;
+        userHPbar.value = _playerHp;
+
+        enemyHPbar.maxValue = _enemyHp;
+        enemyHPbar.value = _enemyHp;
+
+        hpText_user.text = "HP: " + _playerHp.ToString("0");
+        hpText_enemy.text = "HP: " + _enemyHp.ToString("0");
+
+        // Best-effort: read skewness from userInfo via reflection so we don't break if the field is absent.
+        _playerSkewMagnitude = 0f;
+        try
+        {
+            if (userInfo_temp_for_combat != null)
+            {
+                var t = userInfo_temp_for_combat.GetType();
+                var skewField = t.GetField("skew") ??
+                                t.GetField("skewness") ??
+                                t.GetField("Skew") ??
+                                t.GetField("Skewness");
+                if (skewField != null)
+                {
+                    object val = skewField.GetValue(userInfo_temp_for_combat);
+                    if (val != null)
+                    {
+                        _playerSkewMagnitude = Mathf.Abs(Convert.ToSingle(val));
+                    }
+                }
+            }
+        }
+        catch
+        {
+            _playerSkewMagnitude = 0f;
+        }
 
         // Initialize battle report
         _summary = new BattleReportSummary
@@ -224,14 +319,6 @@ public class CombatManager : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         Debug.Log("Attacked by the enemy");
         float calculatedDefenseDamage = getAttackedDamage(userInfo_temp_for_combat, bountyItem_info);
-        if (calculatedDefenseDamage >= userInfo_temp_for_combat.mean)
-        {
-            // This means the user loses
-            Debug.Log("User Lose");
-            combatLog.text = "User Lose";
-            // TODO: Implement an "end game" method for when a familiar is defeated.
-            FinishAndSend("lose");
-        }
         animateAttack(false, 0.2f);
         yield return new WaitForSeconds(0.2f);
         changeHPbar(true, calculatedDefenseDamage);
@@ -296,39 +383,26 @@ public class CombatManager : MonoBehaviour
     IEnumerator Attack_Coroutine(){
         Debug.Log("Attack");
         float calculatedAttackDamage = getAttackDamage(userInfo_temp_for_combat, bountyItem_info);
-        if (calculatedAttackDamage >= bountyItem_info.mean){
-            // This means the user wins and HP of the enemy must be 0
-            animateAttack(true, 0.2f);
-            yield return new WaitForSeconds(0.2f);
-            changeHPbar(false, calculatedAttackDamage);
-            // record player attack turn (after HP updates)
-            RecordTurn("player", "attack", calculatedAttackDamage);
-            Debug.Log("User Win");
-            // combatLog.text = "User Win";
+
+        // Player attack animation and HP update
+        animateAttack(true, 0.2f);
+        yield return new WaitForSeconds(0.2f);
+        changeHPbar(false, calculatedAttackDamage);
+        // record player attack turn (after HP updates)
+        RecordTurn("player", "attack", calculatedAttackDamage);
+
+        // Check if enemy died as a result of this hit
+        if (enemyHPbar != null && enemyHPbar.value <= 0f && !_battleEnded)
+        {
+            Debug.Log("Enemy HP reached 0 after player attack. Finishing battle as WIN.");
             FinishAndSend("win");
             isExecuted = false;
             yield break;
-        }else{
-            // This means that it's just a normal attack to the enemy
-            animateAttack(true, 0.2f);
-            yield return new WaitForSeconds(0.2f);
-            changeHPbar(false, calculatedAttackDamage);
-            // record player attack turn (after HP updates)
-            RecordTurn("player", "attack", calculatedAttackDamage);
-
-            // if enemy died as a result of this hit, finish now
-            if (enemyHPbar != null && enemyHPbar.value <= 0f && !_battleEnded)
-            {
-                Debug.Log("Enemy HP reached 0 after player attack. Finishing battle as WIN.");
-                FinishAndSend("win");
-                isExecuted = false;
-                yield break;
-            }
-
-            Debug.Log("Normal attack");
-            // now being attacked by the enemy
-            yield return AttackedByTheEnemy();
         }
+
+        Debug.Log("Normal attack");
+        // now being attacked by the enemy
+        yield return AttackedByTheEnemy();
     }
 
     public void animateAttack(bool isFromUser, float time){
@@ -355,41 +429,88 @@ public class CombatManager : MonoBehaviour
     public void changeHPbar(bool isForUser, float damage)
     {
         Debug.Log("Change HP bar: " + damage.ToString() + " isForUser: " + isForUser.ToString() + "");
-        //animate the HP bar
-        //if isForUser is true, then animate the user's HP bar
-        //else animate the enemy's HP bar
-        if (isForUser){
-            //animate the user's HP bar
-            userHPbar.value -= damage;
-            if (userHPbar.value <= 0)
-                userHPbar.value = 0;
-
-            userInfo_temp_for_combat.mean = userHPbar.value;
-        }else{
-            //animate the enemy's HP bar
-            enemyHPbar.value -= damage;
-            if (enemyHPbar.value <= 0)
-                enemyHPbar.value = 0;
-
-            bountyItem_info.mean = enemyHPbar.value;
+        if (isForUser)
+        {
+            // Damage to the user
+            _playerHp -= damage;
+            if (_playerHp < 0f) _playerHp = 0f;
+            userHPbar.value = _playerHp;
+        }
+        else
+        {
+            // Damage to the enemy
+            _enemyHp -= damage;
+            if (_enemyHp < 0f) _enemyHp = 0f;
+            enemyHPbar.value = _enemyHp;
         }
 
-        hpText_user.text = "HP: " + userInfo_temp_for_combat.mean.ToString();
-        hpText_enemy.text = "HP: " + bountyItem_info.mean.ToString();
+        hpText_user.text = "HP: " + _playerHp.ToString("0");
+        hpText_enemy.text = "HP: " + _enemyHp.ToString("0");
     }
 
     public float getAttackDamage(UserInfo userInfo, BountyItem bountyItem)
     {
-        return Random.Range(userInfo.mean - userInfo.sd, userInfo.mean + userInfo.sd)/10; 
+        float center = userInfo.mean;
+        float spread = Mathf.Max(0f, userInfo.sd);
+        float raw = UnityEngine.Random.Range(center - spread, center + spread);
+        if (raw < 0f) raw = 0f;
+
+        float dmg = raw * _playerDmgMult * damageScale;
+        return Mathf.Max(1f, dmg);
     }
 
     public float getAttackedDamage(UserInfo userInfo, BountyItem bountyItem)
     {
-        return Random.Range(bountyItem.mean - bountyItem.sd, bountyItem.mean + bountyItem.sd)/10;
+        float center = bountyItem.mean;
+        float spread = Mathf.Max(0f, bountyItem.sd);
+        float raw = UnityEngine.Random.Range(center - spread, center + spread);
+        if (raw < 0f) raw = 0f;
+
+        float dmg = raw * _enemyDmgMult * damageScale;
+
+        // Apply a medium skewness penalty based on the magnitude of the player's skew.
+        // Higher skew => more unstable familiar => takes more damage.
+        float skewPenalty = _playerSkewMagnitude * skewPenaltyScale;
+        dmg += skewPenalty;
+
+        return Mathf.Max(1f, dmg);
     }
+
     public float getDefenceDamage(UserInfo userInfo, BountyItem bountyItem)
     {
-        return Random.Range(bountyItem.mean - bountyItem.sd, bountyItem.mean + bountyItem.sd)/10;
+        float center = bountyItem.mean;
+        float spread = Mathf.Max(0f, bountyItem.sd);
+        float raw = UnityEngine.Random.Range(center - spread, center + spread);
+        if (raw < 0f) raw = 0f;
+
+        float dmg = raw * _enemyDmgMult * damageScale;
+        return Mathf.Max(1f, dmg);
+    }
+
+    /// <summary>
+    /// Returns the base reputation reward for the current bounty by difficulty.
+    /// Easy / unknown = 1, Medium = 10, Hard = 100.
+    /// </summary>
+    private int GetReputationForCurrentBounty()
+    {
+        int rep = 1;
+        string diff = string.Empty;
+
+        try
+        {
+            if (bountyItem_info != null)
+                diff = bountyItem_info.difficulty ?? string.Empty;
+        }
+        catch
+        {
+            // fall back to default rep = 1
+        }
+
+        if (diff.Equals("Medium", System.StringComparison.OrdinalIgnoreCase)) rep = 10;
+        else if (diff.Equals("Hard", System.StringComparison.OrdinalIgnoreCase)) rep = 100;
+        else rep = 1; // Easy or unknown
+
+        return rep;
     }
 
     /// <summary>
@@ -398,32 +519,32 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     private void AwardReputationForCurrentBounty()
     {
-        int rep = 1;
         string diff = string.Empty;
-        try 
+        try
         {
             if (bountyItem_info != null)
                 diff = bountyItem_info.difficulty ?? string.Empty;
-
-            if (diff.Equals("Medium", System.StringComparison.OrdinalIgnoreCase)) rep = 10;
-            else if (diff.Equals("Hard", System.StringComparison.OrdinalIgnoreCase)) rep = 100;
-            else rep = 1; // Easy or unknown
         }
-        catch { rep = 1; }
+        catch
+        {
+            diff = string.Empty;
+        }
+
+        int rep = GetReputationForCurrentBounty();
 
         try
         {
             if (Wallet.Instance != null)
             {
                 int before = 0;
-                try { before = Wallet.Instance.Reputation; } catch {}
+                try { before = Wallet.Instance.Reputation; } catch { }
 
                 Wallet.Instance.Add(rep);
 
                 int after = 0;
-                try { after = Wallet.Instance.Reputation; } catch {}
+                try { after = Wallet.Instance.Reputation; } catch { }
 
-                Debug.Log($"[CombatManager] Awarded +{rep} reputation for difficulty '{(string.IsNullOrEmpty(diff)?"Easy/Unknown":diff)}'. Before={before}, After={after}");
+                Debug.Log($"[CombatManager] Awarded +{rep} reputation for difficulty '{(string.IsNullOrEmpty(diff) ? "Easy/Unknown" : diff)}'. Before={before}, After={after}");
             }
             else
             {
@@ -474,7 +595,10 @@ public class CombatManager : MonoBehaviour
                 repBefore = Wallet.Instance.Reputation;
             }
         }
-        catch {}
+        catch
+        {
+            // ignore; leave repBefore = 0
+        }
 
         if (outcome == "win")
         {
@@ -496,9 +620,39 @@ public class CombatManager : MonoBehaviour
                 repAfter = repBefore;
             }
         }
+        else if (outcome == "lose" || outcome == "flee")
+        {
+            // On defeat or flee, subtract half the reputation that would have been earned for this bounty.
+            int baseReward = GetReputationForCurrentBounty();
+            int penalty = Mathf.CeilToInt(baseReward * 0.5f);
+
+            if (penalty > 0 && Wallet.Instance != null)
+            {
+                int beforePenalty = repBefore;
+                try { beforePenalty = Wallet.Instance.Reputation; } catch { }
+
+                Wallet.Instance.Add(-penalty);
+
+                try
+                {
+                    repAfter = Wallet.Instance.Reputation;
+                }
+                catch
+                {
+                    repAfter = beforePenalty;
+                }
+
+                Debug.Log($"[CombatManager] Applied defeat penalty -{penalty} reputation. Before={beforePenalty}, After={repAfter}");
+            }
+            else
+            {
+                // No wallet or zero penalty; no change.
+                repAfter = repBefore;
+            }
+        }
         else
         {
-            // No reputation change on lose/flee; after == before.
+            // No reputation change on flee/other; after == before.
             repAfter = repBefore;
         }
 
