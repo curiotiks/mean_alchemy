@@ -1449,6 +1449,9 @@ MonoBehaviour:
     category: Combat
     key: battle_report
   nextSceneName: TheLab
+  labWarpEvent:
+    category: UI
+    key: start_game
 --- !u!4 &947237663
 Transform:
   m_ObjectHideFlags: 0

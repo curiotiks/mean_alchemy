@@ -65,6 +65,11 @@ MonoBehaviour:
       action: enter
       target: toLab
       description: The player has entered the gateway to the lab
+    - key: warp_blocked
+      action: attemped
+      target: warp_attempt_blocked
+      description: 'The player attempted to enter the combat zone but is missing
+        either the bounty or a distribution. '
   - name: Alchemy ADD Stones
     entries:
     - key: add_stone_one
