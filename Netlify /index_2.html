@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mean Alchemy — Links</title>
+  <meta name="description" content="Mean Alchemy quick links: play builds, instructions, surveys, and resources." />
+  <style>
+    :root{
+      --bg:#0b0e14; --card:#121826; --text:#e8eefc; --muted:#a9b4d0;
+      --accent:#7dd3fc; --accent2:#a78bfa; --border:rgba(255,255,255,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background: radial-gradient(1100px 600px at 20% 0%, #1b2440 0%, var(--bg) 60%);
+      color:var(--text); min-height:100vh; padding:28px;
+      display:grid; place-items:center;
+    }
+    .wrap{width:min(980px,100%)}
+    .card{
+      background:rgba(18,24,38,.92);
+      border:1px solid rgba(125,211,252,.18);
+      border-radius:18px;
+      box-shadow:0 18px 60px rgba(0,0,0,.45);
+      padding:26px;
+    }
+    h1{margin:0 0 8px; font-size:clamp(26px,3.5vw,44px)}
+    p{margin:10px 0; color:var(--muted); line-height:1.55}
+    .badge{
+      display:inline-flex; gap:8px; align-items:center;
+      background:rgba(125,211,252,.12);
+      border:1px solid rgba(125,211,252,.22);
+      padding:6px 10px; border-radius:999px;
+      color:var(--accent); font-size:13px; margin-bottom:14px;
+    }
+    .grid{display:grid; gap:14px; grid-template-columns:1fr}
+    @media (min-width:780px){.grid{grid-template-columns:1.2fr .8fr}}
+    .section{background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:14px; padding:14px}
+    .links{display:grid; gap:10px; margin-top:10px}
+    a.btn{
+      text-decoration:none; display:flex; justify-content:space-between; align-items:center;
+      padding:12px 14px; border-radius:12px;
+      border:1px solid rgba(125,211,252,.22);
+      background:rgba(125,211,252,.10);
+      color:var(--text); font-weight:650;
+    }
+    a.btn:hover{border-color:rgba(125,211,252,.35); background:rgba(125,211,252,.14)}
+    .tag{font-size:12px; font-weight:700; color:rgba(255,255,255,.80)}
+    .tag.purple{color:rgba(167,139,250,.95)}
+    .tag.blue{color:rgba(125,211,252,.95)}
+    .tag.gray{color:rgba(169,180,208,.95)}
+    .small{font-size:13px; color:var(--muted)}
+    .footer{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="badge">🧪 Mean Alchemy • quick links</div>
+      <h1>Mean Alchemy</h1>
+      <p>One page with all the live links. Built for “I need this working tomorrow” energy.</p>
+
+      <!-- ===== CONFIG: REPLACE URLS BELOW ===== -->
+      <script>
+        const LINKS = {
+          play_primary:  { url: "PUT_WEBGL_LINK_HERE", label: "Play (WebGL build)", tag: "PLAY", tagClass:"blue" },
+          play_backup:   { url: "PUT_GITHUB_PAGES_LINK_HERE", label: "Play (backup / GitHub Pages)", tag: "BACKUP", tagClass:"gray" },
+          instructions:  { url: "PUT_INSTRUCTIONS_LINK_HERE", label: "Instructions / How to start", tag: "INFO", tagClass:"gray" },
+          consent:       { url: "PUT_CONSENT_OR_SURVEY_LINK_HERE", label: "Consent / Survey", tag: "SURVEY", tagClass:"purple" },
+          repo:          { url: "PUT_GITHUB_REPO_LINK_HERE", label: "GitHub repo", tag: "CODE", tagClass:"gray" },
+          troubleshooting:{ url: "PUT_TROUBLESHOOTING_LINK_HERE", label: "Troubleshooting", tag: "HELP", tagClass:"gray" }
+        };
+      </script>
+      <!-- ===================================== -->
+
+      <div class="grid">
+        <div class="section">
+          <div class="small"><strong>Launch</strong></div>
+          <div class="links" id="launchLinks"></div>
+        </div>
+
+        <aside class="section">
+          <div class="small"><strong>Tomorrow-safe checklist</strong></div>
+          <p class="small">✅ Page loads<br/>✅ Play link opens build<br/>✅ Study code entry works<br/>✅ First scene loads</p>
+          <p class="small">Last updated: <span id="ts"></span></p>
+          <p class="small">If WebGL is cranky: refresh once, then try Chrome.</p>
+        </aside>
+      </div>
+
+      <div class="section" style="margin-top:14px">
+        <div class="small"><strong>Resources</strong></div>
+        <div class="links" id="resourceLinks"></div>
+      </div>
+
+      <div class="footer small">
+        <div>Built on Netlify • <span id="host"></span></div>
+        <div><span>Contact:</span> <code>YOUR_EMAIL_OR_NOTE_HERE</code></div>
+      </div>
+    </section>
+
+    <script>
+      const now = new Date();
+      document.getElementById("ts").textContent = now.toLocaleString();
+      document.getElementById("host").textContent = location.host;
+
+      function btnHTML(item){
+        const safeUrl = item.url || "#";
+        const tagClass = item.tagClass || "gray";
+        return `
+          <a class="btn" href="${safeUrl}" target="_blank" rel="noopener">
+            <span>${item.label}</span>
+            <span class="tag ${tagClass}">${item.tag || ""} ↗</span>
+          </a>`;
+      }
+
+      const launch = [
+        LINKS.play_primary,
+        LINKS.play_backup
+      ].filter(x => x && x.url && !x.url.startsWith("PUT_"));
+
+      const resources = [
+        LINKS.instructions,
+        LINKS.consent,
+        LINKS.troubleshooting,
+        LINKS.repo
+      ].filter(x => x && x.url && !x.url.startsWith("PUT_"));
+
+      document.getElementById("launchLinks").innerHTML =
+        launch.length ? launch.map(btnHTML).join("") : `<p class="small">Add your URLs in the CONFIG section.</p>`;
+
+      document.getElementById("resourceLinks").innerHTML =
+        resources.length ? resources.map(btnHTML).join("") : `<p class="small">Add your URLs in the CONFIG section.</p>`;
+    </script>
+  </main>
+</body>
+</html>
