@@ -237,13 +237,14 @@ public class CombatManager : MonoBehaviour
 
         float hpMult = Mathf.Max(1f, baseHpMultiplier);
 
-        // --- HP is derived from SD with diminishing returns ---
+        // --- HP is derived from SD with diminishing returns with a small offset to soften the low-SD penalty ---
         float playerSd = Mathf.Max(0f, userInfo_temp_for_combat.sd);
         float enemySd  = Mathf.Max(0f, bountyItem_info != null ? bountyItem_info.sd : 0f);
 
-        // Diminishing returns: sqrt(SD)
-        float playerHpBase = Mathf.Sqrt(playerSd);
-        float enemyHpBase  = Mathf.Sqrt(enemySd);
+        // Diminishing returns with a small offset to soften the low-SD penalty: sqrt(SD + offset)
+        const float SdHpOffset = 1f; // Keep this in sync with the Alchemy Table preview.
+        float playerHpBase = Mathf.Sqrt(playerSd + SdHpOffset);
+        float enemyHpBase  = Mathf.Sqrt(enemySd  + SdHpOffset);
 
         _playerHp = Mathf.Max(1f, playerHpBase * hpMult);
         _enemyHp  = Mathf.Max(1f, enemyHpBase * enemyHpMult * hpMult);

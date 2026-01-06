@@ -52,6 +52,30 @@
     .tag.gray{color:rgba(169,180,208,.95)}
     .small{font-size:13px; color:var(--muted)}
     .footer{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between}
+    .walkthrough{display:grid; gap:12px; margin-top:10px}
+    .step{background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:14px; padding:14px}
+    .stepHeader{display:flex; gap:10px; align-items:center; margin-bottom:6px}
+    .stepNum{
+      display:inline-grid; place-items:center;
+      width:26px; height:26px; border-radius:999px;
+      background:rgba(125,211,252,.14);
+      border:1px solid rgba(125,211,252,.22);
+      color:var(--accent);
+      font-weight:800; font-size:13px;
+      flex:0 0 auto;
+    }
+    .imgPh{
+      margin-top:10px;
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,.18);
+      background:rgba(0,0,0,.18);
+      aspect-ratio: 16 / 9;
+      display:grid;
+      place-items:center;
+      color:rgba(169,180,208,.9);
+      font-size:13px;
+      overflow:hidden;
+    }
     code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
   </style>
 </head>
@@ -69,7 +93,7 @@
           // play_backup:   { url: "PUT_GITHUB_PAGES_LINK_HERE", label: "Play (backup / GitHub Pages)", tag: "BACKUP", tagClass:"gray" },
           instructions:  { url: "PUT_INSTRUCTIONS_LINK_HERE", label: "Instructions / How to start", tag: "INFO", tagClass:"gray" },
           pretest:      { url: "https://fsu.qualtrics.com/jfe/form/SV_8CasANAi2j4RcHQ", label: "Pretest survey", tag: "SURVEY", tagClass:"purple" },
-          posttest:    { url: "https://fsu.qualtrics.com/jfe/form/SV_0HvGvmHCFiToUNo", label: "Posttest survey", tag: "SURVEY", tagClass:"purple" },
+          posttest:    { url: "https://fsu.qualtrics.com/jfe/form/SV_0HvGvmHCFiToUNo", label: "Posttest survey", tag: "SURVEY", tagClass:"purple" }
         };
       </script>
       <!-- ===================================== -->
@@ -81,16 +105,100 @@
         </div>
 
         <aside class="section">
-          <div class="small"><strong>Tomorrow-safe checklist</strong></div>
-          <p class="small">✅ Page loads<br/>✅ Play link opens build<br/>✅ Study code entry works<br/>✅ First scene loads</p>
+          <div class="small"><strong>Gameplay Cycle</strong></div>
+          <p class="small">✅ Choose your bounty<br/>✅ Empower your familiar<br/>✅ Battle<br/>✅ Earn Reputation & repeat</p>
           <p class="small">Last updated: <span id="ts"></span></p>
-          <p class="small">If WebGL is cranky: refresh once, then try Chrome.</p>
+          <p class="small">The game takes a second to load the first time.</p>
         </aside>
       </div>
 
       <div class="section" style="margin-top:14px">
-        <div class="small"><strong>Resources</strong></div>
-        <div class="links" id="resourceLinks"></div>
+        <div class="small"><strong>Gameplay Walkthrough</strong></div>
+        <p class="small">
+          <strong>Goal:</strong> earn as much <strong>Reputation</strong> as you can by completing bounties.
+          Each bounty is a battle, and you power your familiar by building a set of number-stones.
+          Your choices shape your familiar’s strength (mean) and stability (spread).
+        </p>
+
+        <div class="walkthrough">
+          <div class="step">
+            <div class="stepHeader"><span class="stepNum">1</span><strong>Choose a bounty</strong></div>
+            <p class="small">Pick an <em>Easy</em> bounty first. Medium/Hard are for when you’ve learned the system.</p>
+            <div class="imgPh" aria-label="Placeholder image: Bounty Board scene">
+              <span>Image placeholder: Bounty Board</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="stepHeader"><span class="stepNum">2</span><strong>Empower your familiar</strong></div>
+            <p class="small">
+              Add number-stones (1–10) to create a distribution. Aim for a strong <strong>mean</strong> while keeping enough
+              <strong>spread</strong> (SD) for survivability. Watch your <strong>Attack Range</strong> and <strong>Stability</strong> updates.
+            </p>
+            <div class="imgPh" aria-label="Placeholder image: Alchemy Table scene">
+              <span>Image placeholder: Alchemy Table</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="stepHeader"><span class="stepNum">3</span><strong>Battle</strong></div>
+            <p class="small">
+              Start the fight and watch how your choices play out. Some builds hit hard but break fast; others are steadier.
+              If you lose, adjust your stones and try again.
+            </p>
+            <div class="imgPh" aria-label="Placeholder image: Battle scene">
+              <span>Image placeholder: Battle</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="stepHeader"><span class="stepNum">4</span><strong>Earn Reputation & repeat</strong></div>
+            <p class="small">
+              Winning bounties earns Reputation. Keep refining your distributions to take on harder bounties.
+            </p>
+            <div class="imgPh" aria-label="Placeholder image: Results / Reputation screen">
+              <span>Image placeholder: Results / Reputation</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="small" style="margin-top:12px">
+          <strong>Challenge:</strong> demonstrate your mastery — build the best familiars and earn the <strong>highest Reputation</strong>.
+        </p>
+      </div>
+
+      <div class="section" style="margin-top:14px">
+        <div class="small"><strong>Build Archetypes</strong></div>
+        <p class="small">
+          Different distributions create very different familiars. Below is one example to get you started.
+          You’ll discover others as you experiment.
+        </p>
+
+        <div class="walkthrough">
+          <div class="step">
+            <div class="stepHeader">
+              <span class="stepNum">★</span>
+              <strong>The Glass Cannon</strong>
+            </div>
+            <p class="small">
+              A <em>Glass Cannon</em> hits hard but breaks easily.
+              This build pushes the <strong>mean</strong> high while keeping the <strong>spread (SD)</strong> low.
+            </p>
+            <ul class="small" style="margin:8px 0 0 18px; color:var(--muted)">
+              <li>High mean → strong attacks</li>
+              <li>Low SD → low Stability (low HP)</li>
+              <li>Great for quick wins, risky in long fights</li>
+            </ul>
+            <div class="imgPh" aria-label="Placeholder image: Glass Cannon distribution example">
+              <span>Image placeholder: Glass Cannon distribution</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="small" style="margin-top:12px">
+          <strong>Think ahead:</strong> powerful builds often come with hidden weaknesses.
+          Reputation goes to players who balance power and survival.
+        </p>
       </div>
 
       <div class="footer small">
@@ -121,18 +229,8 @@
         // LINKS.posttest
       ].filter(x => x && x.url && !x.url.startsWith("PUT_"));
 
-      const resources = [
-        LINKS.instructions,
-        LINKS.consent,
-        LINKS.troubleshooting,
-        LINKS.repo
-      ].filter(x => x && x.url && !x.url.startsWith("PUT_"));
-
       document.getElementById("launchLinks").innerHTML =
         launch.length ? launch.map(btnHTML).join("") : `<p class="small">Add your URLs in the CONFIG section.</p>`;
-
-      document.getElementById("resourceLinks").innerHTML =
-        resources.length ? resources.map(btnHTML).join("") : `<p class="small">Add your URLs in the CONFIG section.</p>`;
     </script>
   </main>
 </body>

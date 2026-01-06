@@ -117,10 +117,12 @@ public class Table_Control_Panel : MonoBehaviour
             attack_range_text.text = $"Damage: {Math.Round(minAttack, 1)} – {Math.Round(maxAttack, 1)}";
         }
 
-        // Stability is a preview of survivability: diminishing returns on SD (sqrt).
+        // Stability is a preview of survivability: diminishing returns on SD with a small offset.
+        // Keep this in sync with CombatManager (sqrt(SD + offset)).
         if (stability_text != null)
         {
-            float stability = Mathf.Sqrt(Mathf.Max(0f, sd));
+            const float SdHpOffset = 1f;
+            float stability = Mathf.Sqrt(Mathf.Max(0f, sd) + SdHpOffset);
             stability_text.text = $"Stability: {Math.Round(stability, 1)}";
         }
 
@@ -183,7 +185,8 @@ public class Table_Control_Panel : MonoBehaviour
 
         if (stability_text != null)
         {
-            float stability = Mathf.Sqrt(Mathf.Max(0f, sd));
+            const float SdHpOffset = 1f;
+            float stability = Mathf.Sqrt(Mathf.Max(0f, sd) + SdHpOffset);
             stability_text.text = $"Stability: {Math.Round(stability, 1)}";
         }
 
