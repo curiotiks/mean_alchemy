@@ -76,6 +76,19 @@
       font-size:13px;
       overflow:hidden;
     }
+    /* Make real screenshots fill the placeholder frame neatly */
+    .imgPh img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    /* Safety: if an <img> accidentally uses the .imgPh class directly */
+    img.imgPh{
+      width:100%;
+      height:auto;
+      display:block;
+    }
     code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
   </style>
 </head>
@@ -123,9 +136,9 @@
         <div class="walkthrough">
           <div class="step">
             <div class="stepHeader"><span class="stepNum">1</span><strong>Choose a bounty</strong></div>
-            <p class="small">Pick an <em>Easy</em> bounty first. Medium/Hard are for when you’ve learned the system.</p>
-            <div class="imgPh" aria-label="Placeholder image: Bounty Board scene">
-              <span>Image placeholder: Bounty Board</span>
+            <p class="small">Choose easy bounties for small rewards. Bigger bounties to succeed!</p>
+            <div class="imgPh" aria-label="Bounty Board scene">
+              <img src="img/L2B_v1.png" alt="Bounty Board scene" />
             </div>
           </div>
 
@@ -135,8 +148,8 @@
               Add number-stones (1–10) to create a distribution. Aim for a strong <strong>mean</strong> while keeping enough
               <strong>spread</strong> (SD) for survivability. Watch your <strong>Attack Range</strong> and <strong>Stability</strong> updates.
             </p>
-            <div class="imgPh" aria-label="Placeholder image: Alchemy Table scene">
-              <span>Image placeholder: Alchemy Table</span>
+            <div class="imgPh" aria-label="Table Scene">
+              <img src="img/L2T_v1.png" alt="Table Scene" />
             </div>
           </div>
 
@@ -146,8 +159,8 @@
               Start the fight and watch how your choices play out. Some builds hit hard but break fast; others are steadier.
               If you lose, adjust your stones and try again.
             </p>
-            <div class="imgPh" aria-label="Placeholder image: Battle scene">
-              <span>Image placeholder: Battle</span>
+            <div class="imgPh" aria-label="Combat Scene">
+              <img src="img/L2C_v1.png" alt="Combat Scene" />
             </div>
           </div>
 
@@ -156,8 +169,8 @@
             <p class="small">
               Winning bounties earns Reputation. Keep refining your distributions to take on harder bounties.
             </p>
-            <div class="imgPh" aria-label="Placeholder image: Results / Reputation screen">
-              <span>Image placeholder: Results / Reputation</span>
+            <div class="imgPh" aria-label="Reputation">
+              <img src="img/Reputation.png" alt="Reputation" />
             </div>
           </div>
         </div>
@@ -174,30 +187,80 @@
           You’ll discover others as you experiment.
         </p>
 
-        <div class="walkthrough">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:10px">
+
           <div class="step">
             <div class="stepHeader">
               <span class="stepNum">★</span>
-              <strong>The Glass Cannon</strong>
+              <strong>Glass Cannon</strong>
             </div>
             <p class="small">
-              A <em>Glass Cannon</em> hits hard but breaks easily.
-              This build pushes the <strong>mean</strong> high while keeping the <strong>spread (SD)</strong> low.
+              A high-risk, high-reward build that focuses on raw power.
             </p>
             <ul class="small" style="margin:8px 0 0 18px; color:var(--muted)">
-              <li>High mean → strong attacks</li>
-              <li>Low SD → low Stability (low HP)</li>
-              <li>Great for quick wins, risky in long fights</li>
+              <li><strong>Mean:</strong> High</li>
+              <li><strong>SD:</strong> Low</li>
+              <li><strong>Attack:</strong> High and consistent</li>
+              <li><strong>HP:</strong> Low (low Stability)</li>
             </ul>
-            <div class="imgPh" aria-label="Placeholder image: Glass Cannon distribution example">
-              <span>Image placeholder: Glass Cannon distribution</span>
-            </div>
           </div>
+
+          <div class="step">
+            <div class="stepHeader">
+              <span class="stepNum">★</span>
+              <strong>Survivor</strong>
+            </div>
+            <p class="small">
+              A defensive build that prioritizes staying alive over dealing damage.
+            </p>
+            <ul class="small" style="margin:8px 0 0 18px; color:var(--muted)">
+              <li><strong>Mean:</strong> Moderate</li>
+              <li><strong>SD:</strong> High</li>
+              <li><strong>Attack:</strong> Variable and unpredictable</li>
+              <li><strong>HP:</strong> High (high Stability)</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <div class="stepHeader">
+              <span class="stepNum">★</span>
+              <strong>Balanced</strong>
+            </div>
+            <p class="small">
+              A flexible build that balances power and survivability.
+            </p>
+            <ul class="small" style="margin:8px 0 0 18px; color:var(--muted)">
+              <li><strong>Mean:</strong> High</li>
+              <li><strong>SD:</strong> Moderate</li>
+              <li><strong>Attack:</strong> Strong with some variability</li>
+              <li><strong>HP:</strong> Moderate (enough Stability)</li>
+            </ul>
+          </div>
+
         </div>
 
         <p class="small" style="margin-top:12px">
           <strong>Think ahead:</strong> powerful builds often come with hidden weaknesses.
           Reputation goes to players who balance power and survival.
+        </p>
+      </div>
+
+      <div class="section" style="margin-top:14px">
+        <div class="small"><strong>How the Numbers Are Calculated</strong></div>
+        <p class="small">
+          These rules are always active in the game. You don’t need to memorize them — they are here so the system is transparent and fair.
+        </p>
+
+        <ul class="small" style="margin:10px 0 0 18px; color:var(--muted)">
+          <li><strong>Mean:</strong> the average of your stones.</li>
+          <li><strong>Spread (SD):</strong> how far your stones are from the mean.</li>
+          <li><strong>Attack:</strong> based on your mean, with variability added by your spread.</li>
+          <li><strong>Stability:</strong> increases as spread increases, but with diminishing returns.</li>
+          <li><strong>HP:</strong> Stability × a fixed game constant (number).</li>
+        </ul>
+
+        <p class="small" style="margin-top:10px">
+          Higher mean increases damage. Higher spread increases survivability but also makes damage more unpredictable.
         </p>
       </div>
 
