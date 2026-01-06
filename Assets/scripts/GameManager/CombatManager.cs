@@ -236,8 +236,17 @@ public class CombatManager : MonoBehaviour
         float designEnemyMean = (bountyItem_info != null ? bountyItem_info.mean : 10f);
 
         float hpMult = Mathf.Max(1f, baseHpMultiplier);
-        _playerHp = Mathf.Max(1f, designPlayerMean * hpMult);
-        _enemyHp = Mathf.Max(1f, designEnemyMean * enemyHpMult * hpMult);
+
+        // --- HP is derived from SD with diminishing returns ---
+        float playerSd = Mathf.Max(0f, userInfo_temp_for_combat.sd);
+        float enemySd  = Mathf.Max(0f, bountyItem_info != null ? bountyItem_info.sd : 0f);
+
+        // Diminishing returns: sqrt(SD)
+        float playerHpBase = Mathf.Sqrt(playerSd);
+        float enemyHpBase  = Mathf.Sqrt(enemySd);
+
+        _playerHp = Mathf.Max(1f, playerHpBase * hpMult);
+        _enemyHp  = Mathf.Max(1f, enemyHpBase * enemyHpMult * hpMult);
 
         userHPbar.maxValue = _playerHp;
         userHPbar.value = _playerHp;
@@ -448,6 +457,7 @@ public class CombatManager : MonoBehaviour
         hpText_enemy.text = "HP: " + _enemyHp.ToString("0");
     }
 
+    // Attack power is driven by MEAN; SD affects variability only.
     public float getAttackDamage(UserInfo userInfo, BountyItem bountyItem)
     {
         float center = userInfo.mean;
@@ -459,6 +469,7 @@ public class CombatManager : MonoBehaviour
         return Mathf.Max(1f, dmg);
     }
 
+    // Incoming damage uses enemy mean/SD and is penalized by player skew; player SD no longer grants survivability directly here.
     public float getAttackedDamage(UserInfo userInfo, BountyItem bountyItem)
     {
         float center = bountyItem.mean;

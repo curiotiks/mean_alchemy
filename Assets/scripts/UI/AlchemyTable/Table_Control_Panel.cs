@@ -12,6 +12,8 @@ public class Table_Control_Panel : MonoBehaviour
     public TextMeshProUGUI mean_text;
     public TextMeshProUGUI skew_text;
     public TextMeshProUGUI sd_text;
+    public TextMeshProUGUI attack_range_text;
+    public TextMeshProUGUI stability_text;
     public Table_Plot_Panel plot_panel;
     public GameObject meterArrow;
     public float rotationRange = 180f,rotationFactor = -30f; // The maximum rotation angle for the object (in degrees) 
@@ -40,6 +42,25 @@ public class Table_Control_Panel : MonoBehaviour
         return current < plot_panel.max_stacked_count;
     }
 
+    /// <summary>
+    /// Updates the interactable state of the UI button for the given number based on current column capacity.
+    /// This ensures the add button re-enables after removals/trash.
+    /// </summary>
+    private void RefreshAddButtonForNum(int num)
+    {
+        if (Table_Elements_Panel.instance == null) return;
+        Btn_num btnNum = Table_Elements_Panel.instance.GetButtonComponent(num);
+        if (btnNum == null) return;
+
+        // In our UI, the clickable Button is typically on the same GameObject as Btn_num.
+        // Fall back to searching children if needed.
+        Button uiButton = btnNum.GetComponent<Button>();
+        if (uiButton == null) uiButton = btnNum.GetComponentInChildren<Button>();
+        if (uiButton == null) return;
+
+        uiButton.interactable = CanAddToColumn(num);
+    }
+
     void Update() {
         UpdateMeter();
     }
@@ -50,6 +71,8 @@ public class Table_Control_Panel : MonoBehaviour
             // if the numbers_list contains the given number equal/over the cap, early-out
             if(plot_panel != null && countForNum >= plot_panel.max_stacked_count){
                 Debug.Log($"numbers_list contains {num} more than {plot_panel.max_stacked_count} elements");
+                // Ensure UI stays disabled when at cap
+                RefreshAddButtonForNum(num);
                 return countForNum; // do not update visuals/statistics
             }
 
@@ -82,9 +105,30 @@ public class Table_Control_Panel : MonoBehaviour
         Debug.Log("new mean: "+mean);
         Debug.Log("new sd: "+sd);
 #endif
-        mean_text.text = "Mean: "+ Math.Round(mean, 2);
-        sd_text.text = "SD: "+ Math.Round(sd, 2);
+        mean_text.text = "Mean: " + Math.Round(mean, 2);
+        sd_text.text = "SD: " + Math.Round(sd, 2);
+
+        // Preview stats for combat (UI only):
+        // Damage is the raw distribution range mean ± SD (no difficulty or scaling).
+        if (attack_range_text != null)
+        {
+            float minAttack = Mathf.Max(0f, mean - sd);
+            float maxAttack = mean + sd;
+            attack_range_text.text = $"Damage: {Math.Round(minAttack, 1)} – {Math.Round(maxAttack, 1)}";
+        }
+
+        // Stability is a preview of survivability: diminishing returns on SD (sqrt).
+        if (stability_text != null)
+        {
+            float stability = Mathf.Sqrt(Mathf.Max(0f, sd));
+            stability_text.text = $"Stability: {Math.Round(stability, 1)}";
+        }
+
         plot_panel.drawPlot(num, isAdded);
+
+        // Ensure the add button reflects current capacity after any add/remove.
+        RefreshAddButtonForNum(num);
+
         // GET THE COUNT OF STONES IN THE LIST
         return numbers_list.Count(x => x == num);
     }
@@ -129,7 +173,24 @@ public class Table_Control_Panel : MonoBehaviour
 #endif
         mean_text.text = "Mean: " + Math.Round(mean, 2);
         sd_text.text = "SD: " + Math.Round(sd, 2);
+
+        if (attack_range_text != null)
+        {
+            float minAttack = Mathf.Max(0f, mean - sd);
+            float maxAttack = mean + sd;
+            attack_range_text.text = $"Damage: {Math.Round(minAttack, 1)} – {Math.Round(maxAttack, 1)}";
+        }
+
+        if (stability_text != null)
+        {
+            float stability = Mathf.Sqrt(Mathf.Max(0f, sd));
+            stability_text.text = $"Stability: {Math.Round(stability, 1)}";
+        }
+
         plot_panel.drawPlot(num, false  );
+
+        // After trashing a column, the add button must re-enable if below cap.
+        RefreshAddButtonForNum(num);
     }
 
     public double standardDeviation(IEnumerable<int> values)
@@ -186,6 +247,15 @@ public class Table_Control_Panel : MonoBehaviour
         sd = 0;
         skew = 0;
         plot_panel.resetPlot();
+
+        if (attack_range_text != null) attack_range_text.text = "Damage: —";
+        if (stability_text != null) stability_text.text = "Stability: —";
+
+        // Re-enable all add buttons since the table is empty again.
+        for (int i = 1; i <= 10; i++)
+        {
+            RefreshAddButtonForNum(i);
+        }
       //  UpdateMeter();
     }
 }
