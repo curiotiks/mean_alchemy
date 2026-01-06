@@ -3,7 +3,7 @@
     {
       "name": "Dragon Hunt",
       "imagePath": "Sprites/familiar/Mon_014_c_front",
-      "mean": 10.0,
+      "mean": 4.0,
       "sd": 2.5,
       "difficulty": "Easy",
       "rewardList": [
@@ -44,7 +44,7 @@
       "name": "Ancient Curse",
       "imagePath": "Sprites/familiar/Mon_005_a_front",
       "mean": 9.0,
-      "sd": 10.0,
+      "sd": 0.8,
       "difficulty": "Medium",
       "rewardList": [
         { "type": 0, "amount": 10 }
@@ -54,7 +54,7 @@
       "name": "Wolf Pack",
       "imagePath": "Sprites/familiar/Mon_006_a_front",
       "mean": 9.5,
-      "sd": 8.0,
+      "sd": 1.0,
       "difficulty": "Medium",
       "rewardList": [
         { "type": 0, "amount": 10 }
@@ -64,7 +64,7 @@
       "name": "Haunted Ruins",
       "imagePath": "Sprites/familiar/Mon_009_a_front",
       "mean": 10.5,
-      "sd": 7.0,
+      "sd": 1.4,
       "difficulty": "Medium",
       "rewardList": [
         { "type": 0, "amount": 10 }
@@ -74,7 +74,7 @@
       "name": "Treasure Hunt",
       "imagePath": "Sprites/familiar/Mon_010_b_front",
       "mean": 10.0,
-      "sd": 12.0,
+      "sd": 1.0,
       "difficulty": "Hard",
       "rewardList": [
         { "type": 0, "amount": 100 }
@@ -84,7 +84,7 @@
       "name": "Mysterious Stranger",
       "imagePath": "Sprites/familiar/Mon_011_b_front",
       "mean": 10.5,
-      "sd": 14.0,
+      "sd": 0.6,
       "difficulty": "Hard",
       "rewardList": [
         { "type": 0, "amount": 100 }
@@ -94,7 +94,7 @@
       "name": "Mysterious Stranger",
       "imagePath": "Sprites/familiar/Mon_012_a_front",
       "mean": 11.0,
-      "sd": 16.0,
+      "sd": 0.8,
       "difficulty": "Hard",
       "rewardList": [
         { "type": 0, "amount": 100 }
@@ -104,7 +104,7 @@
       "name": "Dragon's Lair",
       "imagePath": "Sprites/familiar/Mon_013_a_front",
       "mean": 11.5,
-      "sd": 18.0,
+      "sd": 1.0,
       "difficulty": "Hard",
       "rewardList": [
         { "type": 0, "amount": 100 }
