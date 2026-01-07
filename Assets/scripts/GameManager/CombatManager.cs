@@ -59,7 +59,7 @@ public class CombatManager : MonoBehaviour
 
     [Header("Balance Tuning")]
     [SerializeField] private float baseHpMultiplier = 4f;      // scales both player and enemy HP
-    [SerializeField] private float damageScale = 0.5f;         // scales raw damage so fights last several turns
+    [SerializeField] private float damageScale = 0.25f;         // scales raw damage so fights last several turns
     [SerializeField] private float skewPenaltyScale = 1.0f;    // medium penalty per unit of skew magnitude
 
     private float _playerHp;
