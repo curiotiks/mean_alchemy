@@ -102,11 +102,11 @@
       <!-- ===== CONFIG: REPLACE URLS BELOW ===== -->
       <script>
         const LINKS = {
-          play_primary:  { url: "https://mean-alchemy.netlify.app/play/", label: "Play (WebGL build)", tag: "PLAY", tagClass:"blue" },
           // play_backup:   { url: "PUT_GITHUB_PAGES_LINK_HERE", label: "Play (backup / GitHub Pages)", tag: "BACKUP", tagClass:"gray" },
-          instructions:  { url: "PUT_INSTRUCTIONS_LINK_HERE", label: "Instructions / How to start", tag: "INFO", tagClass:"gray" },
-          pretest:      { url: "https://fsu.qualtrics.com/jfe/form/SV_8CasANAi2j4RcHQ", label: "Pretest survey", tag: "SURVEY", tagClass:"purple" },
-          posttest:    { url: "https://fsu.qualtrics.com/jfe/form/SV_0HvGvmHCFiToUNo", label: "Posttest survey", tag: "SURVEY", tagClass:"purple" }
+          // instructions:  { url: "PUT_INSTRUCTIONS_LINK_HERE", label: "Instructions / How to start", tag: "INFO", tagClass:"gray" },
+          pretest:      { url: "https://fsu.qualtrics.com/jfe/form/SV_8CasANAi2j4RcHQ", label: "Pretest", tag: "SURVEY", tagClass:"purple" },
+          posttest:    { url: "https://fsu.qualtrics.com/jfe/form/SV_0HvGvmHCFiToUNo", label: "Posttest", tag: "SURVEY", tagClass:"purple" },
+          play_primary:  { url: "https://mean-alchemy.netlify.app/play/", label: "Mean Alchemy", tag: "PLAY", tagClass:"blue" },
         };
       </script>
       <!-- ===================================== -->
@@ -118,8 +118,12 @@
         </div>
 
         <aside class="section">
-          <div class="small"><strong>Gameplay Cycle</strong></div>
-          <p class="small">1️⃣ Choose your bounty<br/>2️⃣ Empower your familiar<br/>3️⃣ Battle<br/>4️⃣ Earn Reputation & repeat</p>
+          <div class="small"><strong> ‼️ Important Reminders ‼️ </strong></div>
+          <p class="small">
+            1️⃣ Write you name on and save your code strip!
+            <br/>2️⃣ Do not discuss gameplay during the study!
+            <br/>3️⃣ Do not play outside of class!
+            <br/>4️⃣ Have fun!</p>
           <p class="small">Last updated: <span id="ts"></span></p>
           <p class="small">The game takes a second to load the first time.</p>
         </aside>
@@ -286,10 +290,10 @@
       }
 
       const launch = [
+        LINKS.pretest,
+        // LINKS.posttest,
         LINKS.play_primary,
         LINKS.play_backup,
-        LINKS.pretest,
-        // LINKS.posttest
       ].filter(x => x && x.url && !x.url.startsWith("PUT_"));
 
       document.getElementById("launchLinks").innerHTML =
